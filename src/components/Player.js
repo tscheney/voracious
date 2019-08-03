@@ -555,7 +555,7 @@ export default class Player extends Component {
                 }
 
                 return chunk ? (
-                  <div className="Player-text-chunk-outer" key={subTrack.id}>
+                  <div className={'Player-text-chunk-outer Player-text-chunk-outer-' + (hidden ? 'hidden' : 'visible')} key={subTrack.id}>
                     <div className="Player-text-chunk-inner">
                       <div style={{position: 'relative'}}>
                         {hidden ? (

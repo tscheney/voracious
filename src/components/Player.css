@@ -87,8 +87,8 @@
 .Player-text-chunks {
   position: absolute;
   bottom: 30px;
-  left: 0;
-  right: 0;
+  left: 3em;
+  right: 3em;
 }
 
 .Player-text-chunk-outer {
@@ -97,12 +97,25 @@
     Itt might be good to have it as an option. We put it in an outer
     wrapper because I think it looks better when it's full-width.
   */
+  border-radius: 10px;
   background: rgba(0,0,0,0.5);
+}
+
+.Player-text-chunk-outer-hidden {
+  display: none;
 }
 
 .Player-text-chunk-inner {
   color: white;
-  text-shadow: -1px -1px 0 black, 1px -1px 0 black, -1px 1px 0 black, 1px 1px 0 black, 0 0 5px black;
+  text-shadow:
+                0 0 1px black,
+                0 0 1px black,
+                0 0 1px black,
+                0 0 2px black,
+                0 0 2px black,
+                0 0 2px black,
+                0 0 3px black,
+                0 0 5px black;
   font-size: 1.6em;
   text-align: center;
   overflow: hidden;
