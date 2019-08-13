@@ -131,7 +131,7 @@ app.on('ready', () => {
   addIpcHandlers();
 
   const menu = Menu.buildFromTemplate(menuTemplate)
-  Menu.setApplicationMenu(menu); // for win/linux, but should be ignored on mac
+  Menu.setApplicationMenu(null); // for win/linux, but should be ignored on mac
 
   createWindow();
 });
