@@ -154,7 +154,7 @@ export default class PlayerExportPanel extends Component {
 
     const addNoteFields = {};
     for (const [ankifn, vorfn] of ankiPrefs.fieldMap.entries()) {
-      if ((vorfn === 'nofill') || (vorfn === 'text') || (vorfn === 'text_readings') || (vorfn === 'selected_text')) {
+      if ((vorfn === 'nofill') || (vorfn === 'text') || (vorfn === 'text_readings') || (vorfn === 'selected_text') || (vorfn === 'time_stamp') || (vorfn === 'title')) {
         addNoteFields[ankifn] = fieldData.get(ankifn);
       } else if (vorfn === 'audio') {
         // NOTE: If audio is being sent to multiple fields, each will get its own file
