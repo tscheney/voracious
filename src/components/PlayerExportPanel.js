@@ -25,6 +25,25 @@ export default class PlayerExportPanel extends Component {
       (c, i) => (c)
     ).join('').trim();
 
+    // Build timestamp.
+    const time_stamp = function () {
+      var pos_real = chunk.position.begin;
+      const hrs = Math.floor(pos_real / (60*60));
+      pos_real -= hrs * 60 * 60;
+      const mnts = Math.floor(pos_real / 60);
+      pos_real -= mnts * 60;
+      const secs = Math.floor(pos_real);
+
+      var time_stamp = "";
+      time_stamp += ("00" + hrs).slice(-2) + ":";
+      time_stamp += ("00" + mnts).slice(-2) + ":";
+      time_stamp += ("00" + secs).slice(-2);
+      return time_stamp;
+    }();
+
+    // Get title of the video.
+    const video_title = this.props.title;
+
     let audioDataPromise;
     if ([...ankiPrefs.fieldMap.values()].includes('audio')) {
       const AUDIO_EXTRACT_PADDING = 0.25;
@@ -84,6 +103,10 @@ export default class PlayerExportPanel extends Component {
         fieldData.set(ankifn, audioDataPromise);
       } else if (vorfn === 'image') {
         fieldData.set(ankifn, imageDataPromise);
+      } else if (vorfn === 'time_stamp') {
+        fieldData.set(ankifn, time_stamp);
+      } else if (vorfn === 'title') {
+        fieldData.set(ankifn, video_title);
       }
     }
 

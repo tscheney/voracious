@@ -508,6 +508,7 @@ export default class Player extends Component {
           chunk: currentChunk,
           videoTime: this.videoTime,
           selectedText: this.firstAnnoTextComponent ? this.firstAnnoTextComponent.getSelectedText() : null,
+          title: this.props.video.name,
         };
       }
       return newState;
