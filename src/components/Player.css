@@ -89,7 +89,7 @@
   bottom: 0;
   left: 3em;
   right: 3em;
-  padding-bottom: 35px;
+  bottom: 30px;
 }
 
 .Player-text-chunk-outer {
@@ -123,7 +123,7 @@
                 0 0 5px black;
   font-size: 1.6em;
   overflow: hidden;
-  padding: 0.6em 2em 0.7em 2em;
+  padding: 0.3em 1em 0.4em 1em;
 }
 
 .Player-text-chunk-inner > span {
