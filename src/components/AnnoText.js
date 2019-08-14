@@ -221,13 +221,13 @@ export default class AnnoText extends PureComponent {
     );
 
     return (
-      <div className="AnnoText">
-        <div {... ((language === 'und' ? {} : {lang: iso6393To6391(language)}))}>{annoTextChildren}</div>
+      <span className="AnnoText">
+        <span {... ((language === 'und' ? {} : {lang: iso6393To6391(language)}))}>{annoTextChildren}</span>
         {this.renderTooltip()}
         {this.state.selectionRange ? (
           <CopyInterceptor copyData={[{format: 'text/plain', data: cpSlice(annoText.text, this.state.selectionRange.cpBegin, this.state.selectionRange.cpEnd)}]}/>
         ) : null}
-      </div>
+      </span>
     );
   }
 }

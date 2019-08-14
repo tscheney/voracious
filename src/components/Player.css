@@ -86,9 +86,10 @@
 
 .Player-text-chunks {
   position: absolute;
-  bottom: 30px;
+  bottom: 0;
   left: 3em;
   right: 3em;
+  padding-bottom: 35px;
 }
 
 .Player-text-chunk-outer {
@@ -98,7 +99,8 @@
     wrapper because I think it looks better when it's full-width.
   */
   border-radius: 10px;
-  background: rgba(0,0,0,0.5);
+  text-align: center;
+  margin-bottom: 10px;
 }
 
 .Player-text-chunk-outer-hidden {
@@ -106,6 +108,9 @@
 }
 
 .Player-text-chunk-inner {
+  display: inline-block;
+  border-radius: 10px;
+  background: rgba(0,0,0,0.5);
   color: white;
   text-shadow:
                 0 0 1px black,
@@ -117,10 +122,12 @@
                 0 0 3px black,
                 0 0 5px black;
   font-size: 1.6em;
-  text-align: center;
   overflow: hidden;
-  padding: 0.3em 0.5em;
-  margin: 10px auto;
+  padding: 0.6em 2em 0.7em 2em;
+}
+
+.Player-text-chunk-inner > span {
+  display: inline-block;
 }
 
 .Player-text-reveal-instructions {

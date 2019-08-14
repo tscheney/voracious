@@ -557,18 +557,18 @@ export default class Player extends Component {
 
                 return chunk ? (
                   <div className={'Player-text-chunk-outer Player-text-chunk-outer-' + (hidden ? 'hidden' : 'visible')} key={subTrack.id}>
-                    <div className="Player-text-chunk-inner">
-                      <div style={{position: 'relative'}}>
+                    <span className="Player-text-chunk-inner">
+                      <span>
                         {hidden ? (
                           <div key={chunk.uid} className="Player-text-reveal-instructions">
                             <div style={{color: '#aaa'}}>(press &darr; to reveal)</div>
                           </div>
                         ) : null}
-                        <div className={'Player-text-chunk-annotext Player-text-chunk-annotext-' + (hidden ? 'hidden' : 'visible')}>
+                        <span className={'Player-text-chunk-annotext Player-text-chunk-annotext-' + (hidden ? 'hidden' : 'visible')}>
                           <AnnoText key={chunk.uid} annoText={chunk.annoText} language={subTrack.language} showRuby={this.props.preferences.showRuby} searchDictionaries={this.props.searchDictionaries} ref={(subTrackIdx === 0) ? (c => { this.firstAnnoTextComponent = c; }) : null} />
-                        </div>
-                      </div>
-                    </div>
+                        </span>
+                      </span>
+                    </span>
                   </div>
                 ) : null;
               })}
