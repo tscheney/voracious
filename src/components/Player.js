@@ -123,6 +123,7 @@ class PlayControls extends Component {
             break;
 
           case 82: // R key
+          case 192: // Backtick key
             onToggleRuby();
             e.preventDefault();
             break;
@@ -593,7 +594,7 @@ export default class Player extends Component {
               <tr><td>Pause/Unpause:</td><td>space</td></tr>
               <tr><td>Export To Anki:</td><td>E</td></tr>
               <tr><td>Toggle Fullscreen:</td><td>F</td></tr>
-              <tr><td>Toggle Furigana/Ruby:</td><td>R</td></tr>
+              <tr><td>Toggle Furigana/Ruby:</td><td>R / `</td></tr>
               <tr><td>Toggle Help:</td><td>H</td></tr>
               {(this.state.subtitleMode === 'manual') ? (
                 <tr><td>Hide/Show<br />Sub Track:</td><td>[1-9]</td></tr>
