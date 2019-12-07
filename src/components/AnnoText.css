@@ -2,6 +2,7 @@
 .AnnoText {
   overflow: hidden;
   user-select: none;
+  font-size: 1.2em;
 }
 
 .AnnoText-textchar {

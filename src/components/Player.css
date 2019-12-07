@@ -110,7 +110,7 @@
 .Player-text-chunk-inner {
   display: inline-block;
   border-radius: 10px;
-  background: rgba(0,0,0,0.5);
+  background: rgba(0,0,0,0.7);
   color: white;
   text-shadow:
                 0 0 1px black,
