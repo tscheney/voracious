@@ -216,14 +216,16 @@ export default class AnnoText extends PureComponent {
     const annoTextChildren = annoTextCustomRender(
       annoText,
       (a, inner) => {
+        const word = cpSlice(annoText.text, a.cpBegin, a.cpEnd);
+        const wordState = this.props.getWordFromList(word).get('learnState');
+        const wordStateClass = "word-state-" + wordState;
+
         if (a.kind === 'ruby') {
-          return showRuby ? [<ruby key={`ruby-${a.cpBegin}:${a.cpEnd}`}>{inner}<rp>(</rp><rt>{a.data}</rt><rp>)</rp></ruby>] : inner;
+          return showRuby ? [<ruby key={`ruby-${a.cpBegin}:${a.cpEnd}`} className={wordStateClass}>{inner}<rp>(</rp><rt>{a.data}</rt><rp>)</rp></ruby>] : inner;
         } else if (a.kind === 'highlight') {
           return [<span key={`highlight-${a.cpBegin}:${a.cpEnd}`} className='AnnoText-highlight'>{inner}</span>];
         } else {
-          const word = cpSlice(annoText.text, a.cpBegin, a.cpEnd);
-          const wordState = this.props.getWordFromList(word).get('learnState');
-          return [<span key={`word-state-${a.cpBegin}:${a.cpEnd}`} className={"word-state-" + wordState}>{inner}</span>];
+          return [<span key={`word-state-${a.cpBegin}:${a.cpEnd}`} className={wordStateClass}>{inner}</span>];
         }
       },
       (c, i) => {
