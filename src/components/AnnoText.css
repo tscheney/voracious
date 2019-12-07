@@ -7,6 +7,21 @@
 .AnnoText-textchar {
 }
 
+.AnnoText .word-state-0 {
+}
+
+.AnnoText .word-state-1 {
+  color: #88dd88;
+}
+
+.AnnoText .word-state-2 {
+  color: #ccccff;
+}
+
+.AnnoText .word-state-3 {
+  color: #ff8888;
+}
+
 .AnnoText-textchar.AnnoText-selected {
   background: rgba(0,255,0,0.5);
 }
