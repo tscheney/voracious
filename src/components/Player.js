@@ -97,17 +97,17 @@ class PlayControls extends Component {
             break;
 
           case 38: // up arrow
+            onContinue();
+            e.preventDefault();
+            break;
+
+          case 40: // down arrow
             onReplay();
             e.preventDefault();
             break;
 
           case 32: // space
             onTogglePause();
-            e.preventDefault();
-            break;
-
-          case 40: // down arrow
-            onContinue();
             e.preventDefault();
             break;
 
@@ -587,8 +587,8 @@ export default class Player extends Component {
           <div className="Player-help-panel-section">
             <div className="Player-help-panel-header">Keyboard Controls</div>
             <table><tbody>
-              <tr><td>Replay Sub:</td><td>&uarr;</td></tr>
-              <tr><td>Reveal Sub /<br/>Unpause:</td><td>&darr;</td></tr>
+              <tr><td>Replay Sub:</td><td>&darr;</td></tr>
+              <tr><td>Reveal Sub /<br/>Unpause:</td><td>&uarr;</td></tr>
               <tr><td>Previous Sub:</td><td>&larr;</td></tr>
               <tr><td>Next Sub:</td><td>&rarr;</td></tr>
               <tr><td>Pause/Unpause:</td><td>space</td></tr>
