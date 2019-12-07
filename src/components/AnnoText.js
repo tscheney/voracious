@@ -22,6 +22,7 @@ export default class AnnoText extends PureComponent {
     this.state = {
       selectionRange: null,
       hoverRange: null,
+      updates: 0,
     };
     this.charElem = {}; // map from cpIndex to element wrapping character
     this.hoverTimeout = null;
@@ -91,20 +92,39 @@ export default class AnnoText extends PureComponent {
     }
   };
 
-  handleCharMouseDown = (e) => {
-    e.preventDefault();
-    const cpIndex = +e.currentTarget.getAttribute('data-index');
-    this.dragStartIndex = cpIndex;
-    if (this.state.selectionRange && (cpIndex >= this.state.selectionRange.cpBegin) && (cpIndex < this.state.selectionRange.cpEnd)) {
-      this.clearSelection();
-    } else {
-      if (this.state.hoverRange) {
-        this.setSelection(this.state.hoverRange.cpBegin, this.state.hoverRange.cpEnd);
+  handleCharMouseDown = async (e) => {
+    if (e.button === 0) {
+      e.preventDefault();
+      const cpIndex = +e.currentTarget.getAttribute('data-index');
+      this.dragStartIndex = cpIndex;
+      if (this.state.selectionRange && (cpIndex >= this.state.selectionRange.cpBegin) && (cpIndex < this.state.selectionRange.cpEnd)) {
+        this.clearSelection();
       } else {
-        this.setSelection(cpIndex, cpIndex+1);
+        if (this.state.hoverRange) {
+          this.setSelection(this.state.hoverRange.cpBegin, this.state.hoverRange.cpEnd);
+        } else {
+          this.setSelection(cpIndex, cpIndex+1);
+        }
+      }
+      document.addEventListener('mouseup', this.handleMouseUp);
+    } else {
+      // Cycle the word learn state.
+      if (this.state.hoverRange) {
+        const word = cpSlice(this.props.annoText.text, this.state.hoverRange.cpBegin, this.state.hoverRange.cpEnd);
+
+        const wordData = this.props.getWordFromList(word);
+        const state = wordData.learnState;
+        const newState = (state + 1) % 4;
+        this.props.setWordInList(
+          word,
+          wordData.set('learnState', newState)
+        );
+
+        // Super hack to get the UI to update.  I don't understand
+        // React.
+        this.setState({updates: this.state.updates + 1});
       }
     }
-    document.addEventListener('mouseup', this.handleMouseUp);
   };
 
   handleCharMouseEnter = (e) => {
@@ -201,7 +221,9 @@ export default class AnnoText extends PureComponent {
         } else if (a.kind === 'highlight') {
           return [<span key={`highlight-${a.cpBegin}:${a.cpEnd}`} className='AnnoText-highlight'>{inner}</span>];
         } else {
-          return inner;
+          const word = cpSlice(annoText.text, a.cpBegin, a.cpEnd);
+          const wordState = this.props.getWordFromList(word).get('learnState');
+          return [<span key={`word-state-${a.cpBegin}:${a.cpEnd}`} className={"word-state-" + wordState}>{inner}</span>];
         }
       },
       (c, i) => {
