@@ -164,6 +164,18 @@
   min-width: 0;
 }
 
+.Player video::-webkit-media-controls-panel {
+  background: #111;
+}
+
+.Player video::-webkit-media-controls-current-time-display, video::-webkit-media-controls-time-remaining-display {
+  color: #bbb;
+}
+
+.Player video::-webkit-media-controls-play-button {
+  color: #fff;
+}
+
 .PlayControls {
   flex: initial;
   text-align: center;
