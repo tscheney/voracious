@@ -64,10 +64,12 @@ class VideoWrapper extends Component {
 class PlayControls extends Component {
   componentDidMount() {
     document.body.addEventListener('keydown', this.handleKeyDown);
+    document.body.addEventListener('keyup', this.handleKeyUp);
   }
 
   componentWillUnmount() {
     document.body.removeEventListener('keydown', this.handleKeyDown);
+    document.body.removeEventListener('keyup', this.handleKeyUp);
   }
 
   handleKeyDown = (e) => {
@@ -78,7 +80,7 @@ class PlayControls extends Component {
       return;
     }
 
-    const { onBack, onAhead, onReplay, onTogglePause, onContinue, onToggleRuby, onToggleHelp, onNumberKey, onExportCard, onToggleFullscreen } = this.props;
+    const { onBack, onAhead, onReplay, onTogglePause, onContinue, onToggleRuby, onMainSubTransient, onRubyTransient, onToggleHelp, onNumberKey, onExportCard, onToggleFullscreen } = this.props;
 
     if (!e.repeat) {
       if ((e.keyCode >= 49) && (e.keyCode <= 57)) {
@@ -128,6 +130,14 @@ class PlayControls extends Component {
             e.preventDefault();
             break;
 
+          case 191: // Forward slash
+            onMainSubTransient(true);
+            break;
+
+          case 16: // Shift
+            onRubyTransient(true);
+            break;
+
           case 72: // H key
             onToggleHelp();
             e.preventDefault();
@@ -137,6 +147,33 @@ class PlayControls extends Component {
             // ignore
             break;
         }
+      }
+    }
+  }
+
+  handleKeyUp = (e) => {
+    // Only process event if the target is the body,
+    // to avoid messing with typing into input elements, etc.
+    // Should we do this instead? e.target.tagName.toUpperCase() === 'INPUT'
+    if (e.target !== document.body) {
+      return;
+    }
+
+    const { onMainSubTransient, onRubyTransient } = this.props;
+
+    if (!e.repeat) {
+      switch (e.keyCode) {
+        case 191: // Forward slash
+          onMainSubTransient(false);
+          break;
+
+        case 16: // Shift
+          onRubyTransient(false);
+          break;
+
+        default:
+          // ignore
+          break;
       }
     }
   }
@@ -179,6 +216,8 @@ export default class Player extends Component {
       subtitleState,
       displayedSubTime,
       displayedSubs: this.getSubsToDisplay(displayedSubTime, subtitleMode, subtitleState),
+      transientSubsOn: false,
+      transientRubyOn: false,
       noAudio: false,
       exporting: null,
     };
@@ -431,7 +470,8 @@ export default class Player extends Component {
   handleContinue = () => {
     switch (this.state.subtitleMode) {
       case 'manual':
-        this.videoMediaComponent.play();
+        this.handleNumberKey(1);
+        // this.videoMediaComponent.play();
         break;
 
       case 'qcheck': // fall through
@@ -476,6 +516,45 @@ export default class Player extends Component {
   handleToggleRuby = () => {
     const { preferences, onSetPreference } = this.props;
     onSetPreference('showRuby', !preferences.showRuby);
+  };
+
+  handleRubyTransient = (set_on) => {
+    const { preferences, onSetPreference } = this.props;
+    if (set_on) {
+      if (!preferences.showRuby) {
+        this.setState({transientRubyOn: true});
+        onSetPreference('showRuby', true);
+      }
+    } else {
+      if (this.state.transientRubyOn) {
+        this.setState({transientRubyOn: false});
+        onSetPreference('showRuby', false);
+      }
+    }
+  };
+
+  handleMainSubTransient = (set_on) => {
+    if (this.state.subtitleMode === 'manual') {
+      if (set_on) {
+        if ([...this.state.subtitleState.trackHidden][0]) {
+          const newTrackHidden = [...this.state.subtitleState.trackHidden];
+          newTrackHidden[0] = false;
+          this.setState({
+            subtitleState: {trackHidden: newTrackHidden},
+            transientSubsOn: true
+          });
+        }
+      } else {
+        if (this.state.transientSubsOn) {
+          const newTrackHidden = [...this.state.subtitleState.trackHidden];
+          newTrackHidden[0] = true;
+          this.setState({
+            subtitleState: {trackHidden: newTrackHidden},
+            transientSubsOn: false
+          });
+        }
+      }
+    }
   };
 
   handleToggleHelp = () => {
@@ -575,7 +654,7 @@ export default class Player extends Component {
               })}
             </div>
           </div>
-          <PlayControls onBack={this.handleBack} onAhead={this.handleAhead} onReplay={this.handleReplay} onTogglePause={this.handleTogglePause} onContinue={this.handleContinue} onToggleRuby={this.handleToggleRuby} onToggleHelp={this.handleToggleHelp} onNumberKey={this.handleNumberKey} onExportCard={this.handleExportCard} onToggleFullscreen={this.handleToggleFullscreen} />
+          <PlayControls onBack={this.handleBack} onAhead={this.handleAhead} onReplay={this.handleReplay} onTogglePause={this.handleTogglePause} onContinue={this.handleContinue} onToggleRuby={this.handleToggleRuby} onMainSubTransient={this.handleMainSubTransient} onRubyTransient={this.handleRubyTransient} onToggleHelp={this.handleToggleHelp} onNumberKey={this.handleNumberKey} onExportCard={this.handleExportCard} onToggleFullscreen={this.handleToggleFullscreen} />
         </div>
         <button className="Player-big-button Player-exit-button" onClick={this.handleExit}>↩</button>
         <div className="Player-subtitle-controls-panel">
