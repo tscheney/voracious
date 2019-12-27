@@ -482,8 +482,12 @@ export default class Player extends Component {
         if (currentRevelation > maxRevelation) {
           throw new Error('internal error');
         } else if (currentRevelation === maxRevelation) {
-          // Continue playing video
-          this.videoMediaComponent.play();
+          if (this.state.subtitleMode === 'qcheck') {
+            this.videoMediaComponent.togglePause();
+          } else {
+            // Continue playing video
+            this.videoMediaComponent.play();
+          }
           this.unfreezeSubs();
         } else {
           // Reveal one more subtitle track
@@ -497,7 +501,7 @@ export default class Player extends Component {
           });
 
           if (this.state.subtitleMode === 'qcheck') {
-            this.videoMediaComponent.pause();
+            this.videoMediaComponent.togglePause();
           }
         }
         break;
