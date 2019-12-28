@@ -31,24 +31,37 @@
   top: 0;
   right: 0;
   color: #ccc;
-  background-color: rgba(0,0,0,0.7);
+  background-color: rgba(0,0,0,0.85);
   padding: 9px 15px 10px 15px;
   border-radius: 0 0 0 10px;
 }
 
 .Player .controls-hide {
-  transition: opacity 0.5s ease-in;
+  transition: opacity 0.5s ease-out;
   opacity: 0;
   pointer-events: none;
 }
 
-.Player video.video-controls-hide::-webkit-media-controls-panel {
-  transition: opacity 0.5s ease-in;
-  opacity: 0;
+/* Weird work-around for opacity transitions not working properly for
+   video::-webkit-media-controls-panel.
+*/
+video.video-controls-hide::-webkit-media-controls-play-button,
+video.video-controls-hide::-webkit-media-controls-volume-slider-container,
+video.video-controls-hide::-webkit-media-controls-volume-slider,
+video.video-controls-hide::-webkit-media-controls-mute-button,
+video.video-controls-hide::-webkit-media-controls-timeline,
+video.video-controls-hide::-webkit-media-controls-current-time-display,
+video.video-controls-hide::-webkit-media-controls-timeline-container,
+video.video-controls-hide::-webkit-media-controls-time-remaining-display
+{
+  transition: opacity 0.5s ease-out;
+  opacity: 0.0;
+  pointer-events: none;
 }
-
-.Player video::-webkit-media-controls-panel {
-  transition: opacity 0.0s ease-in;
+video.video-controls-hide::-webkit-media-controls-panel {
+  transition: background-color 0.5s ease-out;
+  background-color: rgba(0, 0, 0, 0.0);
+  pointer-events: none;
 }
 
 .Player-subtitle-controls-panel select, .Player-subtitle-controls-panel button {
@@ -202,8 +215,8 @@
   min-width: 0;
 }
 
-.Player video::-webkit-media-controls-panel {
-  background: rgba(20, 20, 20, 0.85);
+video::-webkit-media-controls-panel {
+  background-color: rgba(0, 0, 0, 0.85);
 }
 
 .Player video::-webkit-media-controls-current-time-display, video::-webkit-media-controls-time-remaining-display {
