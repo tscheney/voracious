@@ -233,9 +233,8 @@ export default class Player extends Component {
   componentDidMount() {
     this.props.onNeedSubtitles();
     this.restorePlaybackPosition();
-    document.body.addEventListener('mousemove', this.handleRevealUI);
-    this.setUIHideTimeout();
-
+    document.body.addEventListener('mousemove', this.handleMouseMove);
+    this.handleMouseMove();
     this.savePlaybackPositionTimer = window.setInterval(this.savePlaybackPosition, 1000);
   }
 
@@ -243,7 +242,7 @@ export default class Player extends Component {
     if (this.savePlaybackPositionTimer) {
       window.clearInterval(this.savePlaybackPositionTimer);
     }
-    document.body.removeEventListener('mousemove', this.handleRevealUI);
+    document.body.removeEventListener('mousemove', this.handleMouseMove);
   }
 
   componentDidUpdate(prevProps) {
@@ -258,17 +257,13 @@ export default class Player extends Component {
     }
   }
 
-  setUIHideTimeout = () => {
-    window.clearTimeout(this.hideUITimer);
-    this.hideUITimer = window.setTimeout(this.handleHideUIAfterTimeout, 1000);
-  }
-
-  handleRevealUI = () => {
+  handleMouseMove = () => {
     this.setState({ controlsHidden: false });
-    this.setUIHideTimeout();
+    window.clearTimeout(this.hideUITimer);
+    this.hideUITimer = window.setTimeout(this.handleMouseMoveTimeout, 1000);
   };
 
-  handleHideUIAfterTimeout = () => {
+  handleMouseMoveTimeout = () => {
     this.setState({ controlsHidden: true });
     window.clearTimeout(this.hideUITimer);
   };
