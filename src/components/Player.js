@@ -232,6 +232,7 @@ export default class Player extends Component {
     this.props.onNeedSubtitles();
     this.restorePlaybackPosition();
     document.body.addEventListener('mousemove', this.handleRevealUI);
+    this.setUIHideTimeout();
 
     this.savePlaybackPositionTimer = window.setInterval(this.savePlaybackPosition, 1000);
   }
@@ -257,23 +258,17 @@ export default class Player extends Component {
 
   setUIHideTimeout = () => {
     window.clearTimeout(this.hideUITimer);
-    this.hideUITimer = window.setTimeout(this.handleHideUIAfterTimeout, 3000);
+    this.hideUITimer = window.setTimeout(this.handleHideUIAfterTimeout, 1000);
   }
 
   handleRevealUI = () => {
-    const currentWindow = remote.getCurrentWindow();
-    if (currentWindow.isFullScreen()) {
-      this.setState({ controlsHidden: false });
-      this.setUIHideTimeout();
-    }
+    this.setState({ controlsHidden: false });
+    this.setUIHideTimeout();
   };
 
   handleHideUIAfterTimeout = () => {
-    const currentWindow = remote.getCurrentWindow();
-    if (currentWindow.isFullScreen() && this.videoIsPlaying) {
-      this.setState({ controlsHidden: true });
-      window.clearTimeout(this.hideUITimer);
-    }
+    this.setState({ controlsHidden: true });
+    window.clearTimeout(this.hideUITimer);
   };
 
   getOrderedSubtitleTracks = () => {
@@ -399,12 +394,10 @@ export default class Player extends Component {
 
   handleVideoPlaying = () => {
     this.videoIsPlaying = true;
-    this.setUIHideTimeout();
   };
 
   handleVideoPause = () => {
     this.videoIsPlaying = false;
-    this.handleRevealUI();
   };
 
   handleVideoEnded = () => {
@@ -634,7 +627,6 @@ export default class Player extends Component {
   handleToggleFullscreen = () => {
     const currentWindow = remote.getCurrentWindow();
     currentWindow.setFullScreen(!currentWindow.isFullScreen());
-    this.setUIHideTimeout();
   };
 
   handleExit = () => {
@@ -651,8 +643,12 @@ export default class Player extends Component {
   render() {
     const { video } = this.props;
 
+    var divStyle = this.state.controlsHidden ? {
+      cursor: 'none',
+    } : {};
+
     return (
-      <div className="Player">
+      <div className="Player" style={divStyle}>
         <div className="Player-main">
           <div className="Player-video-area">
             <VideoWrapper videoURL={video.videoURL} initialTime={video.playbackPosition} onTimeUpdate={this.handleVideoTimeUpdate} onPlaying={this.handleVideoPlaying} onPause={this.handleVideoPause} onEnded={this.handleVideoEnded} onSeeking={this.handleVideoSeeking} onNoAudio={this.handleNoAudio} ref={(c) => { this.videoMediaComponent = c; }} />
@@ -687,16 +683,16 @@ export default class Player extends Component {
           </div>
           <PlayControls onBack={this.handleBack} onAhead={this.handleAhead} onReplay={this.handleReplay} onTogglePause={this.handleTogglePause} onContinue={this.handleContinue} onToggleRuby={this.handleToggleRuby} onMainSubTransient={this.handleMainSubTransient} onRubyTransient={this.handleRubyTransient} onToggleHelp={this.handleToggleHelp} onNumberKey={this.handleNumberKey} onExportCard={this.handleExportCard} onToggleFullscreen={this.handleToggleFullscreen} />
         </div>
-        {!this.state.controlsHidden ? (
-          <button className="Player-big-button Player-exit-button" onClick={this.handleExit}>↩</button>
-        ) : null}
-        {!this.state.controlsHidden ? (
-          <div className="Player-subtitle-controls-panel">
+        {(
+          <button className={this.state.controlsHidden ? "Player-big-button Player-exit-button controls-hide" : "Player-big-button Player-exit-button"} onClick={this.handleExit}>↩</button>
+        )}
+        {(
+          <div className={this.state.controlsHidden ? "Player-subtitle-controls-panel controls-hide" : "Player-subtitle-controls-panel"}>
             Subtitle Mode:&nbsp;&nbsp;
             <Select options={Object.entries(MODE_TITLES).map(([k, v]) => ({value: k, label: v}))} onChange={this.handleSetSubtitleMode} value={this.state.subtitleMode} />&nbsp;&nbsp;
             <button onClick={e => { e.preventDefault(); this.handleToggleHelp(); }}>Toggle Help</button>
           </div>
-        ) : null}
+        )}
         <div className="Player-help-panel" style={{display: this.props.preferences.showHelp ? 'block' : 'none'}}>
           <div className="Player-help-panel-section">
             <div className="Player-help-panel-header">Keyboard Controls</div>
