@@ -54,9 +54,11 @@ class VideoWrapper extends Component {
   }
 
   render() {
-    const { videoURL, initialTime, onTimeUpdate, onPlaying, onPause, onEnded, onSeeking } = this.props;
+    const { videoURL, initialTime, onTimeUpdate, onPlaying, onPause, onEnded, onSeeking, controlsHidden } = this.props;
+    var class_names = controlsHidden ? "video-controls-hide" : "";
+
     return (
-      <video src={videoURL} controls controlsList="nodownload nofullscreen" onTimeUpdate={e => { onTimeUpdate(e.target.currentTime); }} onPlaying={onPlaying} onPause={onPause} onEnded={onEnded} onSeeking={onSeeking} ref={(el) => { this.videoElem = el; }} onLoadedMetadata={e => { e.target.currentTime = initialTime ? initialTime : 0; }} onCanPlay={this.handleCanPlay} />
+      <video src={videoURL} className={class_names} controls controlsList="nodownload nofullscreen" onTimeUpdate={e => { onTimeUpdate(e.target.currentTime); }} onPlaying={onPlaying} onPause={onPause} onEnded={onEnded} onSeeking={onSeeking} ref={(el) => { this.videoElem = el; }} onLoadedMetadata={e => { e.target.currentTime = initialTime ? initialTime : 0; }} onCanPlay={this.handleCanPlay} />
     );
   }
 }
@@ -643,15 +645,15 @@ export default class Player extends Component {
   render() {
     const { video } = this.props;
 
-    var divStyle = this.state.controlsHidden ? {
+    var playerStyle = this.state.controlsHidden ? {
       cursor: 'none',
     } : {};
 
     return (
-      <div className="Player" style={divStyle}>
+      <div className="Player" style={playerStyle}>
         <div className="Player-main">
           <div className="Player-video-area">
-            <VideoWrapper videoURL={video.videoURL} initialTime={video.playbackPosition} onTimeUpdate={this.handleVideoTimeUpdate} onPlaying={this.handleVideoPlaying} onPause={this.handleVideoPause} onEnded={this.handleVideoEnded} onSeeking={this.handleVideoSeeking} onNoAudio={this.handleNoAudio} ref={(c) => { this.videoMediaComponent = c; }} />
+            <VideoWrapper videoURL={video.videoURL} initialTime={video.playbackPosition} onTimeUpdate={this.handleVideoTimeUpdate} onPlaying={this.handleVideoPlaying} onPause={this.handleVideoPause} onEnded={this.handleVideoEnded} onSeeking={this.handleVideoSeeking} onNoAudio={this.handleNoAudio} ref={(c) => { this.videoMediaComponent = c; }} controlsHidden={this.state.controlsHidden} />
             <div className="Player-text-chunks">
               {this.state.displayedSubs.map(({ subTrack, chunk }, subTrackIdx) => {
                 let hidden = false;

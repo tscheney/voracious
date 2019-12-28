@@ -42,6 +42,15 @@
   pointer-events: none;
 }
 
+.Player video.video-controls-hide::-webkit-media-controls-panel {
+  transition: opacity 0.5s ease-in;
+  opacity: 0;
+}
+
+.Player video::-webkit-media-controls-panel {
+  transition: opacity 0.0s ease-in;
+}
+
 .Player-subtitle-controls-panel select, .Player-subtitle-controls-panel button {
   font-size: 11pt;
   outline: none;
