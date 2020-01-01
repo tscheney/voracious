@@ -25,7 +25,7 @@ const VideoListItem = (props) => {
     pos_real = pos_live
   }
   var time_stamp = "";
-  if (pos > 4.0) { // Only give a time stamp if enough has been watched.
+  if (pos_real > 2.0) { // Only give a time stamp if enough has been watched.
     time_stamp += "Watched ";
     time_stamp += secondsToTimestamp(pos_real);
   }
