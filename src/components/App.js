@@ -4,6 +4,8 @@ import { ScrollContext } from 'react-router-scroll-4';
 
 import { extractAudioFromVideo, extractFrameImageFromVideo } from '../library';
 
+import { secondsToTimestamp } from '../util/string';
+
 import './App.css';
 
 import WidthWrapper from './WidthWrapper.js';
@@ -22,19 +24,10 @@ const VideoListItem = (props) => {
   if (pos_live != null) {
     pos_real = pos_live
   }
-  const hrs = Math.floor(pos_real / (60*60));
-  pos_real -= hrs * 60 * 60;
-  const mnts = Math.floor(pos_real / 60);
-  pos_real -= mnts * 60;
-  const secs = Math.floor(pos_real);
   var time_stamp = "";
-  if (hrs > 0 || mnts > 0 || secs > 0) {
+  if (pos > 4.0) { // Only give a time stamp if enough has been watched.
     time_stamp += "Watched ";
-    if (hrs > 0) {
-      time_stamp += ("00" + hrs).slice(-2) + ":";
-    }
-    time_stamp += ("00" + mnts).slice(-2) + ":";
-    time_stamp += ("00" + secs).slice(-2);
+    time_stamp += secondsToTimestamp(pos_real);
   }
 
   return (

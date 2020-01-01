@@ -1,5 +1,7 @@
 import React, { Component } from 'react';
 
+import { secondsToTimestamp } from '../util/string';
+
 import './Player.css';
 
 import Select from './Select.js';
@@ -9,6 +11,34 @@ import PlayerExportPanel from './PlayerExportPanel';
 import { getChunkAtTime, getPrevChunkAtTime, getNextChunkAtTime } from '../util/chunk';
 
 const { remote } = window.require('electron');
+
+class Timeline extends Component {
+  constructor(props) {
+    super(props);
+    this.elem = null;
+  }
+
+  handleFocus = (e) => {
+    // When the element gets focus, immediately remove it.
+    // This is a timeline, not normal input slider.  There are
+    // already hotkeys for moving on the timeline.
+    e.preventDefault();
+    if (e.currentTarget !== null) {
+      e.currentTarget.blur();
+    }
+    if (e.relatedTarget !== null) {
+      e.relatedTarget.focus();
+    }
+  }
+
+
+  render() {
+    const { videoDuration, currentTime, onSlide } = this.props;
+    return (
+      <input class="video_timeline" type="range" min="0" max={Math.ceil(videoDuration)} value={Math.round(currentTime)} onChange={onSlide} onFocus={this.handleFocus} ref={(el) => { this.elem = el; }} />
+    );
+  }
+}
 
 class VideoWrapper extends Component {
   constructor(props) {
@@ -37,7 +67,7 @@ class VideoWrapper extends Component {
     this.videoElem.pause();
   }
 
-  togglePause() {
+  togglePause = () => {
     if (this.videoElem) {
       if (this.videoElem.paused) {
         this.videoElem.play();
@@ -47,18 +77,52 @@ class VideoWrapper extends Component {
     }
   }
 
+  handleTimelineSlide = (e) => {
+    this.seek(e.target.value);
+  }
+
   handleCanPlay = (e) => {
-    if (e.target.webkitAudioDecodedByteCount === 0) {
-      this.props.onNoAudio();
-    }
+    // // TODO: this code below doesn't work anymore, and always detects no audio
+    // // even when the video does play audio just fine. Figure out how to get
+    // // this working again.
+    // if (e.target.webkitAudioDecodedByteCount === 0) {
+    //   this.props.onNoAudio();
+    // }
+  }
+
+  handlePlayButton = () => {
+    this.togglePause();
   }
 
   render() {
     const { videoURL, initialTime, onTimeUpdate, onPlaying, onPause, onEnded, onSeeking, controlsHidden } = this.props;
-    var class_names = controlsHidden ? "video-controls-hide" : "";
+    var class_names = controlsHidden ? "controls-hide" : "";
+
+    // Get timeline info.
+    var video_current_time = 0.0;
+    var video_duration = 0.0;
+    if (this.videoElem && this.videoElem.currentTime > 0.0) {
+      video_current_time = this.videoElem.currentTime;
+    }
+    if (this.videoElem && this.videoElem.duration > 0.0) {
+      video_duration = this.videoElem.duration;
+    }
+
+    // Choose play/pause icon.
+    var play_icon = "⏸";
+    if (this.videoElem && this.videoElem.paused) {
+      play_icon = "▶";
+    }
 
     return (
-      <video src={videoURL} className={class_names} controls controlsList="nodownload nofullscreen" onTimeUpdate={e => { onTimeUpdate(e.target.currentTime); }} onPlaying={onPlaying} onPause={onPause} onEnded={onEnded} onSeeking={onSeeking} ref={(el) => { this.videoElem = el; }} onLoadedMetadata={e => { e.target.currentTime = initialTime ? initialTime : 0; }} onCanPlay={this.handleCanPlay} />
+      <div class="video_wrapper">
+        <video src={videoURL} onTimeUpdate={e => { onTimeUpdate(e.target.currentTime); }} onPlaying={onPlaying} onPause={onPause} onEnded={onEnded} onSeeking={onSeeking} ref={(el) => { this.videoElem = el; }} onLoadedMetadata={e => { e.target.currentTime = initialTime ? initialTime : 0; }} onCanPlay={this.handleCanPlay} onClick={this.togglePause}/>
+        <div className={"video_playback_controls " + class_names}>
+          <div class="play_button" onClick={this.handlePlayButton}>{play_icon}</div>
+          <span class="video_timestamp">{secondsToTimestamp(video_current_time)}&nbsp;&nbsp;/&nbsp;&nbsp;{secondsToTimestamp(video_duration)}</span>
+          <Timeline videoDuration={video_duration} currentTime={video_current_time} onSlide={this.handleTimelineSlide} />
+        </div>
+      </div>
     );
   }
 }
@@ -260,7 +324,7 @@ export default class Player extends Component {
   handleMouseMove = () => {
     this.setState({ controlsHidden: false });
     window.clearTimeout(this.hideUITimer);
-    this.hideUITimer = window.setTimeout(this.handleMouseMoveTimeout, 1000);
+    this.hideUITimer = window.setTimeout(this.handleMouseMoveTimeout, 2000);
   };
 
   handleMouseMoveTimeout = () => {
@@ -421,6 +485,8 @@ export default class Player extends Component {
       };
     });
     this.props.onSetPreference('subtitleMode', newMode);
+
+
   };
 
   handleBack = () => {
