@@ -9,12 +9,16 @@ export const removePrefix = (s, prefix) => {
 
 export const cpSlice = (s, cpBegin, cpEnd) => [...s].slice(cpBegin, cpEnd).join('');
 
-export const secondsToTimestamp = (pos) => {
-  const hrs = Math.floor(pos / (60*60));
-  pos -= hrs * 60 * 60;
-  const mnts = Math.floor(pos / 60);
-  pos -= mnts * 60;
-  const secs = Math.floor(pos);
+// Converts from seconds (float) to a nicely formatted timestamp (string).
+//
+// The timestamp will look like this: "hh:mm:ss", but will omit unneeded digits.
+// For example, if the input is 61 second, the timestamp will be "1:01".
+export const secondsToTimestamp = (seconds) => {
+  const hrs = Math.floor(seconds / (60*60));
+  seconds -= hrs * 60 * 60;
+  const mnts = Math.floor(seconds / 60);
+  seconds -= mnts * 60;
+  const secs = Math.floor(seconds);
 
   var time_stamp = "";
   if (hrs > 0) {

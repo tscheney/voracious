@@ -15,19 +15,25 @@ import AddCollection from './AddCollection.js';
 import ImportEpwing from './ImportEpwing.js';
 
 const VideoListItem = (props) => {
-  const { videoId, collection, name, pos} = props;
+  const { videoId, collection, name, playbackPosition} = props;
   const hasSubs = collection.videos.get(videoId).subtitleTracks.size > 0;
-  const pos_live = collection.videos.get(videoId).playbackPosition;
 
-  // Build timestamp for how much of the episode has been played.
-  var pos_real = pos;
-  if (pos_live != null) {
-    pos_real = pos_live
+  // Get the current playback position.  We first check if we have a "live"
+  // version of the position, if the user has visited the video this session.
+  // Otherwise we get the position that was loaded from the database on
+  // application launch.
+  var position;
+  if (collection.videos.get(videoId).playbackPosition != null) {
+    position = collection.videos.get(videoId).playbackPosition;
+  } else {
+    position = playbackPosition;
   }
+
+  // Build the timestamp for time watched.
   var time_stamp = "";
-  if (pos_real > 2.0) { // Only give a time stamp if enough has been watched.
+  if (position > 2.0) { // Only give a time stamp if enough has been watched.
     time_stamp += "Watched ";
-    time_stamp += secondsToTimestamp(pos_real);
+    time_stamp += secondsToTimestamp(position);
   }
 
   return (
@@ -82,21 +88,21 @@ class App extends Component {
                           {title.parts.seasonEpisodes.length ? (
                             <ul>
                               {title.parts.seasonEpisodes.map(se => (
-                                <VideoListItem collection={collection} videoId={se.videoId} name={'Season ' + se.seasonNumber + ' Episode ' + se.episodeNumber} pos={se.playbackPosition} key={se.videoId} />
+                                <VideoListItem collection={collection} videoId={se.videoId} name={'Season ' + se.seasonNumber + ' Episode ' + se.episodeNumber} playbackPosition={se.playbackPosition} key={se.videoId} />
                               ))}
                             </ul>
                           ) : null}
                           {title.parts.episodes.length ? (
                             <ul>
                               {title.parts.episodes.map(ep => (
-                                <VideoListItem collection={collection} videoId={ep.videoId} name={'Episode ' + ep.episodeNumber} pos={ep.playbackPosition} key={ep.videoId} />
+                                <VideoListItem collection={collection} videoId={ep.videoId} name={'Episode ' + ep.episodeNumber} playbackPosition={ep.playbackPosition} key={ep.videoId} />
                               ))}
                             </ul>
                           ) : null}
                           {title.parts.others.length ? (
                             <ul>
                               {title.parts.others.map(other => (
-                                <VideoListItem collection={collection} videoId={other.videoId} name={other.name} pos={other.playbackPosition} key={other.name} />
+                                <VideoListItem collection={collection} videoId={other.videoId} name={other.name} playbackPosition={other.playbackPosition} key={other.name} />
                               ))}
                             </ul>
                           ) : null}
@@ -126,7 +132,7 @@ class App extends Component {
                                     </Link>
                                   </li>
                                 ) : (
-                                  <VideoListItem collection={collection} videoId={title.videoId} name={title.name} pos={title.playbackPosition} key={title.name} />
+                                  <VideoListItem collection={collection} videoId={title.videoId} name={title.name} playbackPosition={title.playbackPosition} key={title.name} />
                                 )
                               )}
                             </ul>
