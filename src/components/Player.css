@@ -1,7 +1,7 @@
 .Player-big-button {
   display: block;
   position: absolute;
-  color: #aaa;
+  color: #ddd;
   border: none;
   text-shadow: -1px -1px 0 black, 1px -1px 0 black, -1px 1px 0 black, 1px 1px 0 black, 0 0 5px black;
   background: transparent;
@@ -12,7 +12,7 @@
 }
 
 .Player-big-button:hover {
-  color: #ddd;
+  color: #fff;
 }
 
 .Player-exit-button {
@@ -218,7 +218,7 @@
 }
 
 .video_playback_controls .play_button {
-  color: #aaa;
+  color: #ddd;
   font-size: 1.3em;
   cursor: pointer;
   height: 1.3em;
@@ -226,7 +226,7 @@
   margin-left: 0.2em;
 }
 .video_playback_controls .play_button:hover {
-  color: #ddd;
+  color: #fff;
 }
 
 .video_playback_controls .video_timestamp {
@@ -248,15 +248,15 @@
 
 .video_playback_controls .video_timeline::-webkit-slider-thumb {
   -webkit-appearance: none;
-  height: 1.2em;
-  width: 0.8em;
-  background: #999;
-  border-radius: 0.3em;
+  height: 1em;
+  width: 1em;
+  background: #ddd;
+  border-radius: 0.5em;
   box-shadow: 0 0 4px rgba(0, 0, 0, 0.5);
   cursor: pointer;
 }
 .video_playback_controls .video_timeline::-webkit-slider-thumb:hover {
-  background: #ccc;
+  background: #fff;
 }
 
 .PlayControls {
