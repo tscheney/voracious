@@ -1,6 +1,9 @@
 import path from 'path';
 
-const { app, process } = window.require('electron').remote;
+
+const {app, process} = window.require('@electron/remote');
+
+//const { app, process } = window.require('@electron/remote');
 
 export const getUserDataPath = () => {
   return app.getPath('userData');

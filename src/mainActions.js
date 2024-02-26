@@ -5,7 +5,7 @@ import { getCollectionIndex, loadCollectionSubtitleTrack } from './library';
 import { loadDictionaries, searchIndex } from './dictionary';
 
 const fs = window.require('fs-extra'); // use window to avoid webpack
-const { process } = window.require('electron').remote;
+const { process } = window.require('@electron/remote');
 
 const jstr = JSON.stringify; // alias
 const jpar = JSON.parse; // alias

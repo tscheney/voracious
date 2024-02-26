@@ -9,7 +9,7 @@ import SystemBrowserLink from './SystemBrowserLink.js';
 
 import './Settings.css';
 
-const { app } = window.require('electron').remote;
+const { app } = window.require('@electron/remote');
 
 export default class Settings extends Component {
   render() {

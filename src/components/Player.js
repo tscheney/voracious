@@ -10,7 +10,7 @@ import PlayerExportPanel from './PlayerExportPanel';
 
 import { getChunkAtTime, getPrevChunkAtTime, getNextChunkAtTime } from '../util/chunk';
 
-const { remote } = window.require('electron');
+//const { remote } = window.require('@electron/remote');
 
 class Timeline extends Component {
   constructor(props) {
@@ -688,13 +688,13 @@ export default class Player extends Component {
   };
 
   handleToggleFullscreen = () => {
-    const currentWindow = remote.getCurrentWindow();
+    const currentWindow = require('@electron/remote').getCurrentWindow();
     currentWindow.setFullScreen(!currentWindow.isFullScreen());
   };
 
   handleExit = () => {
     // Make sure they are out of full screen so they don't get stuck in it
-    const currentWindow = remote.getCurrentWindow();
+    const currentWindow = require('@electron/remote').getCurrentWindow();
     if (currentWindow.isFullScreen()) {
       currentWindow.setFullScreen(false);
     }

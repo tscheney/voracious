@@ -7,6 +7,12 @@ const url = require('url');
 // be closed automatically when the JavaScript object is garbage collected.
 let mainWindow;
 
+require('@electron/remote/main').initialize()
+
+ipcMain.on("close-me", (evt, arg) => {
+  app.quit();
+});
+
 // We register our own local: protocol, which behaves like file:, to allow
 //  the renderer window to play videos directly from the filesystem.
 //  The given path must be absolute, and not escaped after the prefix.
@@ -59,9 +65,15 @@ function createWindow() {
     width: 1280,
     height: 720,
     webPreferences: {
-      nodeIntegration: true
+      nodeIntegration: true,
+      contextIsolation: false,
+      enableRemoteModule: true,
+      nodeIntegrationInWorker: true
+      //allowRunningInsecureContent: (serve) ? true : false
     }
   });
+  
+  require('@electron/remote/main').enable(mainWindow.webContents)
 
   // and load the index.html of the app.
   const startUrl = process.env.ELECTRON_START_URL || url.format({
