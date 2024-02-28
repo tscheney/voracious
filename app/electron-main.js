@@ -9,9 +9,9 @@ let mainWindow;
 
 require('@electron/remote/main').initialize()
 
-ipcMain.on("close-me", (evt, arg) => {
-  app.quit();
-});
+//ipcMain.on("close-me", (evt, arg) => {
+//  app.quit();
+//});
 
 // We register our own local: protocol, which behaves like file:, to allow
 //  the renderer window to play videos directly from the filesystem.
