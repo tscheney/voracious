@@ -1,0 +1,30 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        
+      {
+        "name": "Debug Main Process",
+        "type": "node",
+        "request": "launch",
+        "cwd": "${workspaceFolder}",
+        "runtimeExecutable": "npm",
+        // "windows": {
+        //   "runtimeExecutable": "${workspaceFolder}/cross-env NODE_ENV=development ELECTRON_START_URL=http://localhost:3000 electron app"
+        // },
+        "args" : ["run", "electron-start"],
+        "outputCapture": "std"
+      }
+    ]
+  }
+
+//{
+    //     "configurations": [
+        
+//       {
+//     "type": "node",
+//     "request": "launch",
+//     "name": "Launch via NPM",
+//     "runtimeExecutable": "npm",
+//     "cwd": "${workspaceFolder}",
+//     "runtimeArgs": ["run electron-start"]
+// }
