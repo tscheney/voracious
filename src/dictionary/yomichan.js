@@ -1,7 +1,5 @@
 import JSZip from 'jszip';
 
-const fs = window.require('fs-extra');
-
 const loadBank = async (zip, bankName, dictName, reportProgress) => {
   let num = 1;
   const parts = [];
@@ -30,7 +28,7 @@ export const loadYomichanZip = async (fn, reportProgress) => {
     reportProgress('Opening ' + fn + '...');
   }
   console.time('load yomichan zip ' + fn);
-  const data = await fs.readFile(fn);
+  const data = await window.fs.readFile(fn);
   const zip = await JSZip.loadAsync(data);
   const keys = Object.keys(zip.files);
   keys.sort();

@@ -7,8 +7,6 @@ import SecondaryScreen from './SecondaryScreen.js';
 import SystemBrowserLink from './SystemBrowserLink.js';
 import Button from './Button.js';
 
-const { ipcRenderer } = window.require('electron'); // use window to avoid webpack
-
 export default class AddCollection extends Component {
   constructor(props) {
     super(props);
@@ -18,11 +16,11 @@ export default class AddCollection extends Component {
       collectionDirectory: undefined,
     };
 
-    ipcRenderer.on('chose-directory', this.handleIpcChoseCollectionDirectory);
+    window.ipcRenderer.on('chose-directory', this.handleIpcChoseCollectionDirectory);
   }
 
   componentWillUnmount() {
-    ipcRenderer.removeListener('chose-directory', this.handleIpcChoseCollectionDirectory);
+    window.ipcRenderer.removeListener('chose-directory', this.handleIpcChoseCollectionDirectory);
   }
 
   handleNameChange = (e) => {
@@ -38,7 +36,7 @@ export default class AddCollection extends Component {
 
   handleClickChooseCollectionDirectory = (e) => {
     e.preventDefault();
-    ipcRenderer.send('choose-directory', 'Select collection folder');
+    window.ipcRenderer.send('choose-directory', 'Select collection folder');
   };
 
   handleAddCollection = () => {

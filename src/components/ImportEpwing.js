@@ -7,8 +7,6 @@ import SystemBrowserLink from './SystemBrowserLink.js';
 import Button from './Button.js';
 import { importEpwing } from '../dictionary';
 
-const { ipcRenderer } = window.require('electron'); // use window to avoid webpack
-
 export default class ImportEpwing extends Component {
   constructor(props) {
     super(props);
@@ -20,11 +18,11 @@ export default class ImportEpwing extends Component {
       statusText: '',
     };
 
-    ipcRenderer.on('chose-directory', this.handleIpcChoseDirectory);
+    window.ipcRenderer.on('chose-directory', this.handleIpcChoseDirectory);
   }
 
   componentWillUnmount() {
-    ipcRenderer.removeListener('chose-directory', this.handleIpcChoseDirectory);
+    window.ipcRenderer.removeListener('chose-directory', this.handleIpcChoseDirectory);
   }
 
   handleIpcChoseDirectory = (e, dir) => {
@@ -33,7 +31,7 @@ export default class ImportEpwing extends Component {
 
   handleClickChooseDirectory = (e) => {
     e.preventDefault();
-    ipcRenderer.send('choose-directory', 'Choose EPWING folder');
+    window.ipcRenderer.send('choose-directory', 'Choose EPWING folder');
   };
 
   handleImport = async () => {

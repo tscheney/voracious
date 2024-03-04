@@ -14,12 +14,11 @@ import { startLoadingKuromoji } from './util/analysis';
 startLoadingKuromoji();
 
 // Set some last-ditch error handlers
-const { ipcRenderer } = window.require('electron'); // use window to avoid webpack
-
 const errorEmitter = new EventEmitter();
 const handleError = (error) => {
   errorEmitter.emit('error', error);
-  ipcRenderer.send('open-devtools');
+  //window.ipcRenderer.send('open-devtools');
+  window.api.openDevTools();
 };
 window.addEventListener('error', e => {
   handleError(e.error);

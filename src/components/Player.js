@@ -10,8 +10,6 @@ import PlayerExportPanel from './PlayerExportPanel';
 
 import { getChunkAtTime, getPrevChunkAtTime, getNextChunkAtTime } from '../util/chunk';
 
-//const { remote } = window.require('@electron/remote');
-
 class Timeline extends Component {
   constructor(props) {
     super(props);

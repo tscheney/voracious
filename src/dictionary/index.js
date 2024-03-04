@@ -4,8 +4,6 @@ import { getResourcesPath, getUserDataPath } from '../util/appPaths';
 import { loadYomichanZip, indexYomichanEntries } from './yomichan';
 export { importEpwing } from './epwing';
 
-const fs = window.require('fs-extra'); // use window to avoid webpack
-
 const loadAndIndexYomichanZip = async (zipfn, builtin, reportProgress) => {
   const {name, termEntries} = await loadYomichanZip(zipfn, reportProgress);
 
@@ -22,7 +20,7 @@ const loadAndIndexYomichanZip = async (zipfn, builtin, reportProgress) => {
 
 const scanDirForYomichanZips = async (dir, builtin, reportProgress) => {
   const result = [];
-  const dirents = await fs.readdir(dir);
+  const dirents = await window.fs.readdir(dir);
   for (const dirent of dirents) {
     if (path.extname(dirent) === '.zip') {
       // Assume any zips are Yomichan dicts
@@ -41,7 +39,7 @@ export const loadDictionaries = async (reportProgress) => {
 
   // Scan for imported dictionaries
   const importedPath = path.join(getUserDataPath(), 'dictionaries');
-  if (await fs.exists(importedPath)) {
+  if (await window.fs.existsSync(importedPath)) {
     result.push(...await scanDirForYomichanZips(path.join(getUserDataPath(), 'dictionaries'), false, reportProgress));
   }
 

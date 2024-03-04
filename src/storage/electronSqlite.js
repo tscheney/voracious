@@ -1,49 +1,20 @@
-import path from 'path';
-
 import { getUserDataPath } from '../util/appPaths';
 
 // NOTE: We use window.require instead of require or import so that
 //  Webpack doesn't transform it. These requires happen at runtime
 //  via Electron loading mechanisms.
-//const sqlite3 = require('sqlite3');
-//const db = window.require('sqlite');
-
-//const sqlite = window.require('sqlite');
-const sqlite3 = window.require('sqlite3');
-const sqlite = window.require('sqlite');
-
-
 
 class ElectronSqliteBackend {
   constructor(dbFilename) {
     this.dbFilename = dbFilename;
-    this.db = null;
   }
 
   async initialize() {
-    
-    // await db.open({
-    //     filename : this.dbFilename,
-    //     driver: sqlite3.Database
-    //  });
-    
-    // this is a top-level await 
-
-    // open the database
-    this.db = await sqlite.open({
-      filename: this.dbFilename,
-      driver: sqlite3.Database
-    })
-
-    // Table for most of the application data.
-    await this.db.run('CREATE TABLE IF NOT EXISTS kv (k TEXT PRIMARY KEY, v TEXT)');
-
-    // Table for tracking seen/known/etc. words.
-    await this.db.run('CREATE TABLE IF NOT EXISTS words (word TEXT PRIMARY KEY, data TEXT)');
+    await window.api.dbInitialize(this.dbFilename)
   }
 
   async getItemMaybe(key) {
-    const row = await this.db.get('SELECT * FROM kv WHERE k = ?', key);
+    const row = await window.api.dbGet('SELECT * FROM kv WHERE k = ?', key);
     return row && row.v;
   }
 
@@ -57,7 +28,7 @@ class ElectronSqliteBackend {
 
   async getItems(keys) {
     const inPlaceholder = '(' + keys.map(() => '?').join(',') + ')';
-    const rows = await this.db.all('SELECT * FROM kv WHERE k IN ' + inPlaceholder, keys);
+    const rows = await window.api.dbAll('SELECT * FROM kv WHERE k IN ' + inPlaceholder, keys);
     if (rows.length !== keys.length) {
       throw new Error('not all items found');
     }
@@ -88,20 +59,20 @@ class ElectronSqliteBackend {
     //  where they both try to INSERT, I think.
     // TODO: Since all calls go through this same backend object,
     //  and they're all async, we could serialize them here.
-    const { changes } = await this.db.run('UPDATE kv SET v = ? WHERE k = ?', value, key);
+    const { changes } = await window.api.dbRun('UPDATE kv SET v = ? WHERE k = ?', value, key);
     if (changes === 0) {
       // If changes is 0 that means the UPDATE failed to match any rows
-      await this.db.run('INSERT INTO kv (k, v) VALUES (?, ?)', key, value);
+      await window.api.dbRun('INSERT INTO kv (k, v) VALUES (?, ?)', key, value);
     }
   }
 
   async removeItem(key) {
-    await this.db.run('DELETE FROM kv WHERE k = ?', key);
+    await window.api.dbRun('DELETE FROM kv WHERE k = ?', key);
   }
 
   // This is used for loading the word list on startup.
   async getAllWords() {
-    const rows = await this.db.all('SELECT * FROM words');
+    const rows = await window.api.dbAll('SELECT * FROM words');
 
     const word_list = new Map();
     for (const row of rows) {
@@ -120,18 +91,19 @@ class ElectronSqliteBackend {
     //  where they both try to INSERT, I think.
     // TODO: Since all calls go through this same backend object,
     //  and they're all async, we could serialize them here.
-    const { changes } = await this.db.run('UPDATE words SET data = ? WHERE word = ?', data, word);
+    const { changes } = await window.api.dbRun('UPDATE words SET data = ? WHERE word = ?', data, word);
     if (changes === 0) {
       // If changes is 0 that means the UPDATE failed to match any rows
-      await this.db.run('INSERT INTO words (word, data) VALUES (?, ?)', word, data);
+      await window.api.dbRun('INSERT INTO words (word, data) VALUES (?, ?)', word, data);
     }
   }
 }
 
 export default async function createBackend() {
-  const userDataPath = getUserDataPath();
-  const dbFilename = path.join(userDataPath, 'voracious.db');
-
+  const userDataPath = await getUserDataPath();
+  //const dbFilename = path.join(userDataPath, 'voracious.db');
+  const dbFilename = userDataPath + "\\voracious.db";
+  //alert(path.join(userDataPath, voracious.db"));
   const backend = new ElectronSqliteBackend(dbFilename);
   await backend.initialize();
   return backend;

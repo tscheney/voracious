@@ -4,9 +4,6 @@ import createStorageBackend from './storage';
 import { getCollectionIndex, loadCollectionSubtitleTrack } from './library';
 import { loadDictionaries, searchIndex } from './dictionary';
 
-const fs = window.require('fs-extra'); // use window to avoid webpack
-const { process } = window.require('@electron/remote');
-
 const jstr = JSON.stringify; // alias
 const jpar = JSON.parse; // alias
 
@@ -89,7 +86,7 @@ export default class MainActions {
 
     await this._storageLoadSavedWordList();
 
-    if (!process.argv.includes('--nodicts')) {
+    if (!window.process.argv.includes('--nodicts')) {
       this._setLoadingMessage('Loading dictionaries...');
 
       await this._loadDictionaries(progressMsg => {
@@ -418,7 +415,7 @@ export default class MainActions {
       throw new Error('Not allowed to delete built-in dictionary');
     }
 
-    await fs.unlink(dict.filename);
+    await window.fs.unlink(dict.filename);
 
     this.state.set(this.state.get().deleteIn(['dictionaries', name]));
   };

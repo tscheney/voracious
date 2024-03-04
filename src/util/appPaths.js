@@ -1,22 +1,20 @@
-import path from 'path';
-
-
-const {app, process} = window.require('@electron/remote');
-
-//const { app, process } = window.require('@electron/remote');
-
-export const getUserDataPath = () => {
-  return app.getPath('userData');
+export const getUserDataPath = async () => {
+  //let userPath = "";
+  //await window.api.fromAppGetPath("userData").then((response) => {
+  //  userPath = response;
+  //});
+  //return userPath;
+  return await window.api.fromAppGetPath("userData")
 };
 
 export const getResourcesPath = () => {
-  return path.join(app.getAppPath(), 'resources');
+  return window.path.join(window.app.getAppPath(), 'resources');
 };
 
 export const getBinariesPath = () => {
-  let appPath = app.getAppPath();
+  let appPath = window.api.appGetAppPath();
   if (appPath.endsWith('.asar')) {
     appPath += '.unpacked';
   }
-  return path.join(appPath, 'resources', 'bin', process.platform);
+  return window.path.join(appPath, 'resources', 'bin', window.info.process());
 };

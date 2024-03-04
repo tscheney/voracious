@@ -1,7 +1,10 @@
 const {app, protocol, ipcMain, dialog, BrowserWindow, Menu} = require('electron');
 
 const path = require('path');
+const fs = require('fs');
 const url = require('url');
+const sqlite3 = require('sqlite3');
+const sqlite = require('sqlite');
 
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
@@ -12,6 +15,8 @@ require('@electron/remote/main').initialize()
 //ipcMain.on("close-me", (evt, arg) => {
 //  app.quit();
 //});
+
+let db = null
 
 // We register our own local: protocol, which behaves like file:, to allow
 //  the renderer window to play videos directly from the filesystem.
@@ -59,16 +64,17 @@ function addIpcHandlers() {
   });
 }
 
-function createWindow() {
+async function createWindow() {
   // Create the browser window.
   mainWindow = new BrowserWindow({
     width: 1280,
     height: 720,
     webPreferences: {
-      nodeIntegration: true,
-      contextIsolation: false,
-      enableRemoteModule: true,
-      nodeIntegrationInWorker: true
+      //nodeIntegration: true,
+      //enableRemoteModule: true,
+      //nodeIntegrationInWorker: true,
+      sandbox: false,
+      preload: path.join(__dirname, 'preload.js')
       //allowRunningInsecureContent: (serve) ? true : false
     }
   });
@@ -170,6 +176,50 @@ app.on('activate', function() {
     createWindow();
   }
 });
+
+async function dbInitialize(dbFilename)
+{
+  db = await sqlite.open({
+  filename: dbFilename,
+  driver: sqlite3.Database
+})
+
+  // Table for most of the application data.
+  await db.run('CREATE TABLE IF NOT EXISTS kv (k TEXT PRIMARY KEY, v TEXT)');
+
+  // Table for tracking seen/known/etc. words.
+  await db.run('CREATE TABLE IF NOT EXISTS words (word TEXT PRIMARY KEY, data TEXT)');
+}
+
+ipcMain.handle('openDevTools', () => 
+  mainWindow.webContents.openDevTools()
+)
+
+ipcMain.handle('fromAppGetAppPath', () =>
+  app.getAppPath()
+)
+
+ipcMain.handle('fromAppGetPath', async (event, name) => {
+  return app.getPath(name)
+})
+
+ipcMain.handle('dbInitialize', async (event, dbFilename) => {
+    return await dbInitialize(dbFilename)
+})
+
+ipcMain.handle('dbRun', async (event, command, value, key) => {
+    return await db.run(command, value, key)
+})
+
+ipcMain.handle('dbGet', async (event, command, key) => {
+    return await db.get(command, key)
+})
+
+ipcMain.handle('dbAll', async (event, command, keys) => {
+
+    return await db.all(command, keys)
+})
+
 
 // In this file you can include the rest of your app's specific main process
 // code. You can also put them in separate files and require them here.

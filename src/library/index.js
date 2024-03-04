@@ -22,18 +22,16 @@ const EPISODE_PATTERN = /ep([0-9]+)/i;
 const SUBTITLE_LANG_EXTENSION_PATTERN = /(.*)\.([a-zA-Z]{2,3})\.(srt|vtt|ass)/i;
 const SUBTITLE_NOLANG_EXTENSION_PATTERN = /(.*)\.(srt|vtt|ass)/i;
 
-const fs = window.require('fs-extra'); // use window to avoid webpack
-
 const listVideosRel = async (baseDir, relDir) => {
   const result = [];
   const videoFiles = [];
   const subtitleFilesMap = new Map(); // base -> [fn]
 
-  const dirents = await fs.readdir(path.join(baseDir, relDir));
+  const dirents = await window.fs.readdir(path.join(baseDir, relDir));
 
   for (const fn of dirents) {
     const absfn = path.join(baseDir, relDir, fn);
-    const stat = await fs.stat(absfn);
+    const stat = await window.fs.stat(absfn);
 
     if (!stat.isDirectory()) {
       const ext = path.extname(fn);
@@ -93,12 +91,12 @@ const listVideosRel = async (baseDir, relDir) => {
 };
 
 const listDirs = async (dir) => {
-  const dirents = await fs.readdir(dir);
+  const dirents = await window.fs.readdir(dir);
   const result = [];
 
   for (const fn of dirents) {
     const absfn = path.join(dir, fn);
-    const stat = await fs.stat(absfn);
+    const stat = await window.fs.stat(absfn);
 
     if (stat.isDirectory()) {
       result.push(fn);
@@ -127,7 +125,7 @@ export const getCollectionIndex = async (collectionLocator) => {
       titles: [],
     };
 
-    if (!(await fs.exists(baseDirectory))) {
+    if (!(await window.fs.existsSync(baseDirectory))) {
       // Short circuit if base directory is missing
       return result;
     }
@@ -232,7 +230,7 @@ export const getCollectionIndex = async (collectionLocator) => {
 const loadSubtitleTrackFromFile = async (filename) => {
   console.time('loadSubtitleTrackFromFile ' + filename);
 
-  const rawData = await fs.readFile(filename);
+  const rawData = await window.fs.readFile(filename);
   const encodingGuess = jschardet.detect(rawData.toString('binary'));
   console.log('loadSubtitleTrackFromFile guessed encoding', encodingGuess);
   const data = iconv.decode(rawData, encodingGuess.encoding);
