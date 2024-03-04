@@ -4,7 +4,7 @@ export const getUserDataPath = async () => {
   //  userPath = response;
   //});
   //return userPath;
-  return await window.api.fromAppGetPath("userData")
+  return await window.api.invoke("fromAppGetPath", "userData")
 };
 
 export const getResourcesPath = () => {

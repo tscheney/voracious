@@ -27,13 +27,13 @@ const listVideosRel = async (baseDir, relDir) => {
   const videoFiles = [];
   const subtitleFilesMap = new Map(); // base -> [fn]
 
-  const dirents = await window.fs.readdir(path.join(baseDir, relDir));
+  const dirents = await window.api.invoke("fsReadDir", path.join(baseDir, relDir));
 
   for (const fn of dirents) {
     const absfn = path.join(baseDir, relDir, fn);
-    const stat = await window.fs.stat(absfn);
+    const isDirectory = await window.api.invoke("fsStatIsDirectory", absfn);
 
-    if (!stat.isDirectory()) {
+    if (!isDirectory) {
       const ext = path.extname(fn);
       if (SUPPORTED_VIDEO_EXTENSIONS.includes(ext)) {
         videoFiles.push(fn);
@@ -91,14 +91,14 @@ const listVideosRel = async (baseDir, relDir) => {
 };
 
 const listDirs = async (dir) => {
-  const dirents = await window.fs.readdir(dir);
+  const dirents = await window.api.invoke("fsReadDir", dir);
   const result = [];
 
   for (const fn of dirents) {
     const absfn = path.join(dir, fn);
-    const stat = await window.fs.stat(absfn);
+    const isDirectory = await window.api.invoke("fsStatIsDirectory", absfn);
 
-    if (stat.isDirectory()) {
+    if (isDirectory) {
       result.push(fn);
     }
   }
@@ -125,7 +125,7 @@ export const getCollectionIndex = async (collectionLocator) => {
       titles: [],
     };
 
-    if (!(await window.fs.existsSync(baseDirectory))) {
+    if (!(await window.api.invoke("fsExists", baseDirectory))) {
       // Short circuit if base directory is missing
       return result;
     }
@@ -230,7 +230,7 @@ export const getCollectionIndex = async (collectionLocator) => {
 const loadSubtitleTrackFromFile = async (filename) => {
   console.time('loadSubtitleTrackFromFile ' + filename);
 
-  const rawData = await window.fs.readFile(filename);
+  const rawData = await window.api.invoke("fsReadFile", filename);
   const encodingGuess = jschardet.detect(rawData.toString('binary'));
   console.log('loadSubtitleTrackFromFile guessed encoding', encodingGuess);
   const data = iconv.decode(rawData, encodingGuess.encoding);

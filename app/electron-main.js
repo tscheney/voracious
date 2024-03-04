@@ -207,17 +207,37 @@ ipcMain.handle('dbInitialize', async (event, dbFilename) => {
     return await dbInitialize(dbFilename)
 })
 
-ipcMain.handle('dbRun', async (event, command, value, key) => {
-    return await db.run(command, value, key)
+ipcMain.handle('dbRun', async (event, ...args) => {
+    return await db.run(args[0], args[1], args[2])
 })
 
-ipcMain.handle('dbGet', async (event, command, key) => {
-    return await db.get(command, key)
+ipcMain.handle('dbGet', async (event, ...args) => {
+    return await db.get(args[0], args[1])
 })
 
-ipcMain.handle('dbAll', async (event, command, keys) => {
+ipcMain.handle('dbAll', async (event, ...args) => {
 
-    return await db.all(command, keys)
+    return await db.all(args[0], args[1])
+})
+
+ipcMain.handle('fsReadDir', (event, ...args) => {
+    return fs.readdirSync(args[0]);
+})
+
+ipcMain.handle('fsStatIsDirectory', (event, ...args) => {
+    return fs.statSync(args[0]).isDirectory();
+})
+
+ipcMain.handle('fsExists', (event, ...args) => {
+    return fs.existsSync(args[0]);
+})
+
+ipcMain.handle('fsReadFile', (event, ...args) => {
+    return fs.readFileSync(args[0]);
+})
+
+ipcMain.handle('processArgvIncludes', (event, ...args) => {
+    return process.argv.includes(args[0]);
 })
 
 

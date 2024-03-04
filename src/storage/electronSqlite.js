@@ -10,11 +10,11 @@ class ElectronSqliteBackend {
   }
 
   async initialize() {
-    await window.api.dbInitialize(this.dbFilename)
+    await window.api.invoke("dbInitialize", this.dbFilename)
   }
 
   async getItemMaybe(key) {
-    const row = await window.api.dbGet('SELECT * FROM kv WHERE k = ?', key);
+    const row = await window.api.invoke("dbGet", 'SELECT * FROM kv WHERE k = ?', key);
     return row && row.v;
   }
 
@@ -28,7 +28,7 @@ class ElectronSqliteBackend {
 
   async getItems(keys) {
     const inPlaceholder = '(' + keys.map(() => '?').join(',') + ')';
-    const rows = await window.api.dbAll('SELECT * FROM kv WHERE k IN ' + inPlaceholder, keys);
+    const rows = await window.api.invoke("dbAll", 'SELECT * FROM kv WHERE k IN ' + inPlaceholder, keys);
     if (rows.length !== keys.length) {
       throw new Error('not all items found');
     }
@@ -59,20 +59,20 @@ class ElectronSqliteBackend {
     //  where they both try to INSERT, I think.
     // TODO: Since all calls go through this same backend object,
     //  and they're all async, we could serialize them here.
-    const { changes } = await window.api.dbRun('UPDATE kv SET v = ? WHERE k = ?', value, key);
+    const { changes } = await window.api.invoke("dbRun", 'UPDATE kv SET v = ? WHERE k = ?', value, key);
     if (changes === 0) {
       // If changes is 0 that means the UPDATE failed to match any rows
-      await window.api.dbRun('INSERT INTO kv (k, v) VALUES (?, ?)', key, value);
+      await window.api.invoke("dbRun", 'INSERT INTO kv (k, v) VALUES (?, ?)', key, value);
     }
   }
 
   async removeItem(key) {
-    await window.api.dbRun('DELETE FROM kv WHERE k = ?', key);
+    await window.api.invoke("dbRun", 'DELETE FROM kv WHERE k = ?', key);
   }
 
   // This is used for loading the word list on startup.
   async getAllWords() {
-    const rows = await window.api.dbAll('SELECT * FROM words');
+    const rows = await window.api.invoke("dbAll", 'SELECT * FROM words');
 
     const word_list = new Map();
     for (const row of rows) {
@@ -91,10 +91,10 @@ class ElectronSqliteBackend {
     //  where they both try to INSERT, I think.
     // TODO: Since all calls go through this same backend object,
     //  and they're all async, we could serialize them here.
-    const { changes } = await window.api.dbRun('UPDATE words SET data = ? WHERE word = ?', data, word);
+    const { changes } = await window.api.invoke("dbRun", 'UPDATE words SET data = ? WHERE word = ?', data, word);
     if (changes === 0) {
       // If changes is 0 that means the UPDATE failed to match any rows
-      await window.api.dbRun('INSERT INTO words (word, data) VALUES (?, ?)', word, data);
+      await window.api.invoke("dbRun", 'INSERT INTO words (word, data) VALUES (?, ?)', word, data);
     }
   }
 }

@@ -86,7 +86,7 @@ export default class MainActions {
 
     await this._storageLoadSavedWordList();
 
-    if (!window.process.argv.includes('--nodicts')) {
+    if (!window.api.invoke("processArgvIncludes", '--nodicts')) {
       this._setLoadingMessage('Loading dictionaries...');
 
       await this._loadDictionaries(progressMsg => {
