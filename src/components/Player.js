@@ -686,17 +686,12 @@ export default class Player extends Component {
   };
 
   handleToggleFullscreen = () => {
-    const currentWindow = require('@electron/remote').getCurrentWindow();
-    currentWindow.setFullScreen(!currentWindow.isFullScreen());
+    window.api.send("toggleFullscreen");
   };
 
   handleExit = () => {
     // Make sure they are out of full screen so they don't get stuck in it
-    const currentWindow = require('@electron/remote').getCurrentWindow();
-    if (currentWindow.isFullScreen()) {
-      currentWindow.setFullScreen(false);
-    }
-
+    window.api.send("windowExit");
     this.savePlaybackPosition();
     this.props.onExit();
   }

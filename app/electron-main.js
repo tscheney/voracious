@@ -10,8 +10,6 @@ const sqlite = require('sqlite');
 // be closed automatically when the JavaScript object is garbage collected.
 let mainWindow;
 
-require('@electron/remote/main').initialize()
-
 //ipcMain.on("close-me", (evt, arg) => {
 //  app.quit();
 //});
@@ -78,8 +76,6 @@ async function createWindow() {
       //allowRunningInsecureContent: (serve) ? true : false
     }
   });
-  
-  require('@electron/remote/main').enable(mainWindow.webContents)
 
   // and load the index.html of the app.
   const startUrl = process.env.ELECTRON_START_URL || url.format({
@@ -238,6 +234,16 @@ ipcMain.handle('fsReadFile', (event, ...args) => {
 
 ipcMain.handle('processArgvIncludes', (event, ...args) => {
     return process.argv.includes(args[0]);
+})
+
+ipcMain.handle('toggleFullscreen', () => {
+    mainWindow.setFullscreen(!mainWindow.isFullScreen())
+})
+
+ipcMain.handle('windowExit', () => {
+    if (mainWindow.isFullScreen()) {
+        mainWindow.setFullScreen(false);
+    }
 })
 
 
