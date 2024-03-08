@@ -103,7 +103,6 @@ export default async function createBackend() {
   const userDataPath = await getUserDataPath();
   //const dbFilename = path.join(userDataPath, 'voracious.db');
   const dbFilename = userDataPath + "\\voracious.db";
-  //alert(path.join(userDataPath, voracious.db"));
   const backend = new ElectronSqliteBackend(dbFilename);
   await backend.initialize();
   return backend;

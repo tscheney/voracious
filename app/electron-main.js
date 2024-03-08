@@ -5,6 +5,7 @@ const fs = require('fs');
 const url = require('url');
 const sqlite3 = require('sqlite3');
 const sqlite = require('sqlite');
+const assert = require('assert');
 
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
@@ -76,14 +77,18 @@ async function createWindow() {
       //allowRunningInsecureContent: (serve) ? true : false
     }
   });
+  
+  function resolveHtmlPath(htmlFileName) {
+    if (process.env.NODE_ENV === 'development') {
+      const port = process.env.PORT || 1212;
+      const url = new URL(`http://localhost:${port}`);
+      url.pathname = htmlFileName;
+      return url.href;
+    }
+    return `file://${path.resolve(__dirname, '../renderer/', htmlFileName)}`;
+  }
 
-  // and load the index.html of the app.
-  const startUrl = process.env.ELECTRON_START_URL || url.format({
-    pathname: path.join(__dirname, 'index.html'),
-    protocol: 'file:',
-    slashes: true
-  });
-  mainWindow.loadURL(startUrl);
+  mainWindow.loadURL(resolveHtmlPath('index.html'));
 
   // Open the DevTools in dev, or if flag is passed
   if ((process.env.NODE_ENV === 'development') || process.argv.includes('--devtools')) {
@@ -204,36 +209,36 @@ ipcMain.handle('dbInitialize', async (event, dbFilename) => {
 })
 
 ipcMain.handle('dbRun', async (event, ...args) => {
-    return await db.run(args[0], args[1], args[2])
+    return await db.run(...args)
 })
 
 ipcMain.handle('dbGet', async (event, ...args) => {
-    return await db.get(args[0], args[1])
+    return await db.get(...args)
 })
 
 ipcMain.handle('dbAll', async (event, ...args) => {
 
-    return await db.all(args[0], args[1])
+    return await db.all(...args)
 })
 
 ipcMain.handle('fsReadDir', (event, ...args) => {
-    return fs.readdirSync(args[0]);
+    return fs.readdirSync(...args)
 })
 
-ipcMain.handle('fsStatIsDirectory', (event, ...args) => {
-    return fs.statSync(args[0]).isDirectory();
+ipcMain.handle('fsStatIsDirectory', (event, path) => {
+    return fs.statSync(path).isDirectory();
 })
 
-ipcMain.handle('fsExists', (event, ...args) => {
-    return fs.existsSync(args[0]);
+ipcMain.handle('fsExists', (event, path) => {
+    return fs.existsSync(path);
 })
 
 ipcMain.handle('fsReadFile', (event, ...args) => {
-    return fs.readFileSync(args[0]);
+    return fs.readFileSync(...args);
 })
 
 ipcMain.handle('processArgvIncludes', (event, ...args) => {
-    return process.argv.includes(args[0]);
+    return process.argv.includes(...args);
 })
 
 ipcMain.handle('toggleFullscreen', () => {
@@ -244,6 +249,22 @@ ipcMain.handle('windowExit', () => {
     if (mainWindow.isFullScreen()) {
         mainWindow.setFullScreen(false);
     }
+})
+
+ipcMain.handle('pathBasename', async (event, ...args) => {
+    return await path.basename(...args)
+})
+
+ipcMain.handle('pathJoin', async (event, ...args) => {
+    return await path.join(...args)
+})
+
+ipcMain.handle('pathExtname', async (event, dir) => {
+    return await path.extname(dir)
+})
+
+ipcMain.handle('assert', async (event, ...args) => {
+    return await assert(...args)
 })
 
 

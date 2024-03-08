@@ -1,5 +1,3 @@
-import path from 'path';
-
 import jschardet from 'jschardet';
 import iconv from 'iconv-lite';
 
@@ -27,14 +25,15 @@ const listVideosRel = async (baseDir, relDir) => {
   const videoFiles = [];
   const subtitleFilesMap = new Map(); // base -> [fn]
 
-  const dirents = await window.api.invoke("fsReadDir", path.join(baseDir, relDir));
+  const fullDir = await window.api.invoke("pathJoin", baseDir, relDir)
+  const dirents = await window.api.invoke("fsReadDir", fullDir);
 
   for (const fn of dirents) {
-    const absfn = path.join(baseDir, relDir, fn);
+    const absfn = await window.api.invoke("pathJoin", baseDir, relDir, fn);
     const isDirectory = await window.api.invoke("fsStatIsDirectory", absfn);
 
     if (!isDirectory) {
-      const ext = path.extname(fn);
+      const ext = window.api.invoke("pathExtname", fn);
       if (SUPPORTED_VIDEO_EXTENSIONS.includes(ext)) {
         videoFiles.push(fn);
       } else {
@@ -71,18 +70,18 @@ const listVideosRel = async (baseDir, relDir) => {
   for (const vfn of videoFiles) {
     const subtitleTrackIds = [];
 
-    const basevfn = path.basename(vfn, path.extname(vfn));
+    const basevfn = window.api.invoke("pathBasename", vfn, window.api.invoke("pathExtname", vfn));
 
     if (subtitleFilesMap.has(basevfn)) {
       for (const subinfo of subtitleFilesMap.get(basevfn)) {
-        subtitleTrackIds.push(path.join(relDir, subinfo.fn));
+        subtitleTrackIds.push(await window.api.invoke("pathJoin", relDir, subinfo.fn));
       }
     }
 
     result.push({
-      id: path.join(relDir, vfn),
-      name: path.basename(vfn, path.extname(vfn)),
-      url: 'local://' + path.join(baseDir, relDir, vfn), // this prefix works with our custom file protocol for Electron
+      id: await window.api.invoke("pathJoin", relDir, vfn),
+      name: window.api.invoke("pathBasename", vfn, await window.api.invoke("pathExtname", vfn)),
+      url: 'local://' + await window.api.invoke("pathJoin", baseDir, relDir, vfn), // this prefix works with our custom file protocol for Electron
       subtitleTrackIds,
     });
   }
@@ -95,7 +94,7 @@ const listDirs = async (dir) => {
   const result = [];
 
   for (const fn of dirents) {
-    const absfn = path.join(dir, fn);
+    const absfn = await window.api.invoke("pathJoin", dir, fn);
     const isDirectory = await window.api.invoke("fsStatIsDirectory", absfn);
 
     if (isDirectory) {
@@ -148,9 +147,9 @@ export const getCollectionIndex = async (collectionLocator) => {
       const vids = await listVideosRel(baseDirectory, dir);
 
       // There may be season dirs, look for those
-      for (const subDir of await listDirs(path.join(baseDirectory, dir))) {
+      for (const subDir of await listDirs(await window.api.invoke("pathJoin", baseDirectory, dir))) {
         if (subDir.startsWith('Season')) {
-          vids.push(...await listVideosRel(baseDirectory, path.join(dir, subDir)));
+          vids.push(...await listVideosRel(baseDirectory, await window.api.invoke("pathJoin", dir, subDir)));
         }
       }
 
@@ -271,7 +270,7 @@ const loadSubtitleTrackFromFile = async (filename) => {
 export const loadCollectionSubtitleTrack = async (collectionLocator, subTrackId) => {
   if (collectionLocator.startsWith(LOCAL_PREFIX)) {
     const baseDirectory = collectionLocator.slice(LOCAL_PREFIX.length);
-    const subfn = path.join(baseDirectory, subTrackId);
+    const subfn = await window.api.invoke("pathJoin", baseDirectory, subTrackId);
     return await loadSubtitleTrackFromFile(subfn);
   } else {
     throw new Error('internal error');
@@ -281,7 +280,7 @@ export const loadCollectionSubtitleTrack = async (collectionLocator, subTrackId)
 export const extractAudioFromVideo = async (collectionLocator, vidId, startTime, endTime) => {
   if (collectionLocator.startsWith(LOCAL_PREFIX)) {
     const baseDirectory = collectionLocator.slice(LOCAL_PREFIX.length);
-    const vidfn = path.join(baseDirectory, vidId);
+    const vidfn = await window.api.invoke("pathJoin", baseDirectory, vidId);
     const audioData = await extractAudio(vidfn, startTime, endTime);
     return audioData;
   } else {
@@ -292,7 +291,7 @@ export const extractAudioFromVideo = async (collectionLocator, vidId, startTime,
 export const extractFrameImageFromVideo = async (collectionLocator, vidId, time) => {
   if (collectionLocator.startsWith(LOCAL_PREFIX)) {
     const baseDirectory = collectionLocator.slice(LOCAL_PREFIX.length);
-    const vidfn = path.join(baseDirectory, vidId);
+    const vidfn = await window.api.invoke("pathJoin", baseDirectory, vidId);
     const imageData = await extractFrameImage(vidfn, time);
     return imageData;
   } else {

@@ -1,4 +1,3 @@
-import path from 'path';
 import React, { Component } from 'react';
 
 import './AddCollection.css';
@@ -30,7 +29,7 @@ export default class AddCollection extends Component {
   handleIpcChoseCollectionDirectory = (e, dir) => {
     this.setState({collectionDirectory: dir});
     if (!this.state.collectionName) {
-      this.setState({collectionName: path.basename(dir)});
+      this.setState({collectionName: window.api.invoke("pathBasename", dir)});
     }
   };
 

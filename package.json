@@ -24,6 +24,7 @@
     "@electron/rebuild": "^3.2.9",
     "@pmmmwh/react-refresh-webpack-plugin": "^0.5.11",
     "cross-env": "^7.0.3",
+    "css-loader": "^6.8.1",
     "detect-port": "^1.5.1",
     "electron": "^29.0.1",
     "electron-builder": "^24.13.3",
@@ -31,8 +32,12 @@
     "html-webpack-plugin": "^5.5.3",
     "png2icons": "^1.0.1",
     "react-refresh": "^0.14.0",
+    "sass": "^1.67.0",
+    "sass-loader": "^13.3.2",
+    "style-loader": "^3.3.3",
     "ts-node": "^10.9.2",
     "tsconfig-paths-webpack-plugin": "^4.1.0",
+    "ts-loader": "^9.4.4",
     "webpack": "^5.88.2",
     "webpack-cli": "^5.1.4",
     "webpack-bundle-analyzer": "^4.9.1",
@@ -55,6 +60,71 @@
     "start:preload": "cross-env NODE_ENV=development TS_NODE_TRANSPILE_ONLY=true webpack --config ./.erb/configs/webpack.config.preload.dev.ts",
     "start:renderer": "cross-env NODE_ENV=development TS_NODE_TRANSPILE_ONLY=true webpack serve --config ./.erb/configs/webpack.config.renderer.dev.ts"
   }, 
+  "build": {
+    "productName": "ElectronReact",
+    "appId": "org.erb.ElectronReact",
+    "asar": true,
+    "asarUnpack": "**\\*.{node,dll}",
+    "files": [
+      "dist",
+      "node_modules",
+      "package.json",
+      "public"
+    ],
+    "afterSign": ".erb/scripts/notarize.js",
+    "mac": {
+      "target": {
+        "target": "default",
+        "arch": [
+          "arm64",
+          "x64"
+        ]
+      },
+      "type": "distribution",
+      "hardenedRuntime": true,
+      "entitlements": "assets/entitlements.mac.plist",
+      "entitlementsInherit": "assets/entitlements.mac.plist",
+      "gatekeeperAssess": false
+    },
+    "dmg": {
+      "contents": [
+        {
+          "x": 130,
+          "y": 220
+        },
+        {
+          "x": 410,
+          "y": 220,
+          "type": "link",
+          "path": "/Applications"
+        }
+      ]
+    },
+    "win": {
+      "target": [
+        "nsis"
+      ]
+    },
+    "linux": {
+      "target": [
+        "AppImage"
+      ],
+      "category": "Development"
+    },
+    "directories": {
+      "app": "release/app",
+      "buildResources": "assets",
+      "output": "release/build"
+    },
+    "extraResources": [
+      "./assets/**"
+    ],
+    "publish": {
+      "provider": "github",
+      "owner": "electron-react-boilerplate",
+      "repo": "electron-react-boilerplate"
+    }
+  },
   "electronmon": {
     "patterns": [
       "!**/**",
