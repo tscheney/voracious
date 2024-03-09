@@ -26,7 +26,7 @@ const listVideosRel = async (baseDir, relDir) => {
   const subtitleFilesMap = new Map(); // base -> [fn]
 
   const fullDir = await window.api.invoke("pathJoin", baseDir, relDir)
-  const dirents = await window.api.invoke("fsReadDir", fullDir);
+  const dirents = await window.api.invoke("fsReadDirSync", fullDir);
 
   for (const fn of dirents) {
     const absfn = await window.api.invoke("pathJoin", baseDir, relDir, fn);
@@ -90,7 +90,7 @@ const listVideosRel = async (baseDir, relDir) => {
 };
 
 const listDirs = async (dir) => {
-  const dirents = await window.api.invoke("fsReadDir", dir);
+  const dirents = await window.api.invoke("fsReadDirSync", dir);
   const result = [];
 
   for (const fn of dirents) {
@@ -124,7 +124,7 @@ export const getCollectionIndex = async (collectionLocator) => {
       titles: [],
     };
 
-    if (!(await window.api.invoke("fsExists", baseDirectory))) {
+    if (!(await window.api.invoke("fsExistsSync", baseDirectory))) {
       // Short circuit if base directory is missing
       return result;
     }
@@ -229,7 +229,7 @@ export const getCollectionIndex = async (collectionLocator) => {
 const loadSubtitleTrackFromFile = async (filename) => {
   console.time('loadSubtitleTrackFromFile ' + filename);
 
-  const rawData = await window.api.invoke("fsReadFile", filename);
+  const rawData = await window.api.invoke("fsReadFileSync", filename);
   const encodingGuess = jschardet.detect(rawData.toString('binary'));
   console.log('loadSubtitleTrackFromFile guessed encoding', encodingGuess);
   const data = iconv.decode(rawData, encodingGuess.encoding);

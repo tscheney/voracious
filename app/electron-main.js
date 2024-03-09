@@ -1,7 +1,7 @@
 const {app, protocol, ipcMain, dialog, BrowserWindow, Menu} = require('electron');
 
 const path = require('path');
-const fs = require('fs');
+const fs = require('fs-extra');
 const url = require('url');
 const sqlite3 = require('sqlite3');
 const sqlite = require('sqlite');
@@ -63,6 +63,16 @@ function addIpcHandlers() {
   });
 }
 
+function resolveHtmlPath(htmlFileName) {
+    if (process.env.NODE_ENV === 'development') {
+      const port = process.env.PORT || 1212;
+      const url = new URL(`http://localhost:${port}`);
+      url.pathname = htmlFileName;
+      return url.href;
+    }
+    return `file://${path.resolve(__dirname, '../renderer/', htmlFileName)}`;
+}
+
 async function createWindow() {
   // Create the browser window.
   mainWindow = new BrowserWindow({
@@ -77,16 +87,6 @@ async function createWindow() {
       //allowRunningInsecureContent: (serve) ? true : false
     }
   });
-  
-  function resolveHtmlPath(htmlFileName) {
-    if (process.env.NODE_ENV === 'development') {
-      const port = process.env.PORT || 1212;
-      const url = new URL(`http://localhost:${port}`);
-      url.pathname = htmlFileName;
-      return url.href;
-    }
-    return `file://${path.resolve(__dirname, '../renderer/', htmlFileName)}`;
-  }
 
   mainWindow.loadURL(resolveHtmlPath('index.html'));
 
@@ -192,16 +192,20 @@ async function dbInitialize(dbFilename)
   await db.run('CREATE TABLE IF NOT EXISTS words (word TEXT PRIMARY KEY, data TEXT)');
 }
 
-ipcMain.handle('openDevTools', () => 
+ipcMain.handle('openDevTools', () =>
   mainWindow.webContents.openDevTools()
 )
 
-ipcMain.handle('fromAppGetAppPath', () =>
-  app.getAppPath()
-)
+ipcMain.handle('appGetAppPath', (event) => {
+  return path.join(app.getAppPath(), "app") 
+})
 
-ipcMain.handle('fromAppGetPath', async (event, name) => {
+ipcMain.handle('appGetPath', (event, name) => {
   return app.getPath(name)
+})
+
+ipcMain.handle('processPlatform', () => {
+    return process.platform;
 })
 
 ipcMain.handle('dbInitialize', async (event, dbFilename) => {
@@ -217,11 +221,10 @@ ipcMain.handle('dbGet', async (event, ...args) => {
 })
 
 ipcMain.handle('dbAll', async (event, ...args) => {
-
     return await db.all(...args)
 })
 
-ipcMain.handle('fsReadDir', (event, ...args) => {
+ipcMain.handle('fsReadDirSync', (event, ...args) => {
     return fs.readdirSync(...args)
 })
 
@@ -229,12 +232,20 @@ ipcMain.handle('fsStatIsDirectory', (event, path) => {
     return fs.statSync(path).isDirectory();
 })
 
-ipcMain.handle('fsExists', (event, path) => {
+ipcMain.handle('fsExistsSync', (event, path) => {
     return fs.existsSync(path);
 })
 
-ipcMain.handle('fsReadFile', (event, ...args) => {
+ipcMain.handle('fsReadFileSync', (event, ...args) => {
     return fs.readFileSync(...args);
+})
+
+ipcMain.handle('fsUnlinkSync', (event, ...args) => {
+    return fs.unlinkSync(...args);
+})
+
+ipcMain.handle('fsEnsureDirSync', (event, ...args) => {
+    return fs.ensureDirSync(...args);
 })
 
 ipcMain.handle('processArgvIncludes', (event, ...args) => {
@@ -261,6 +272,10 @@ ipcMain.handle('pathJoin', async (event, ...args) => {
 
 ipcMain.handle('pathExtname', async (event, dir) => {
     return await path.extname(dir)
+})
+
+ipcMain.handle('pathParse', async (event, dir) => {
+    return await path.parse(dir)
 })
 
 ipcMain.handle('assert', async (event, ...args) => {

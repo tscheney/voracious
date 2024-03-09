@@ -31,7 +31,7 @@ export const extractAudio = async (vidfn, startTime, endTime) => {
     });
   });
 
-  const data = await window.fs.readFile(tmpfile.path);
+  const data = await window.api.invoke("fsReadFileSync", tmpfile.path);
 
   tmpfile.cleanup();
 
@@ -60,7 +60,7 @@ export const extractFrameImage = async (vidfn, time) => {
     });
   });
 
-  const data = await window.fs.readFile(tmpfile.path);
+  const data = await window.api.invoke("fsReadFileSync", tmpfile.path);
 
   tmpfile.cleanup();
 

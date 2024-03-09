@@ -18,11 +18,12 @@ const loadAndIndexYomichanZip = async (zipfn, builtin, reportProgress) => {
 
 const scanDirForYomichanZips = async (dir, builtin, reportProgress) => {
   const result = [];
-  const dirents = await window.fs.readdir(dir);
+  const dirents = await window.api.invoke("fsReadDirSync", dir);
   for (const dirent of dirents) {
-    if (window.api.invoke("pathExtname", dirent) === '.zip') {
+    if (await window.api.invoke("pathExtname", dirent) === '.zip') {
       // Assume any zips are Yomichan dicts
-      const info = await loadAndIndexYomichanZip(window.api.invoke("pathJoin", dir, dirent), builtin, reportProgress);
+      const yomiZipPath = await window.api.invoke("pathJoin", dir, dirent);
+      const info = await loadAndIndexYomichanZip(yomiZipPath, builtin, reportProgress);
       result.push(info);
     }
   }
@@ -33,12 +34,14 @@ export const loadDictionaries = async (reportProgress) => {
   const result = [];
 
   // Scan for built-in dictionaries
-  result.push(...await scanDirForYomichanZips(window.api.invoke("pathJoin", getResourcesPath(), 'dictionaries'), true, reportProgress));
+  const yomiChanPath = await window.api.invoke("pathJoin", await getResourcesPath(), 'dictionaries');
+  result.push(...await scanDirForYomichanZips(yomiChanPath, true, reportProgress));
 
   // Scan for imported dictionaries
-  const importedPath = window.api.invoke("pathJoin", getUserDataPath(), 'dictionaries');
-  if (await window.fs.existsSync(importedPath)) {
-    result.push(...await scanDirForYomichanZips(window.api.invoke("pathJoin", getUserDataPath(), 'dictionaries'), false, reportProgress));
+  const importedPath = await window.api.invoke("pathJoin", await getUserDataPath(), 'dictionaries');
+  if (await window.api.invoke("fsExistsSync", importedPath)) {
+    const userDictPath = await window.api.invoke("pathJoin", await getUserDataPath(), 'dictionaries');
+    result.push(...await scanDirForYomichanZip(userDictPath, false, reportProgress));
   }
 
   return result;

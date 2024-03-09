@@ -85,8 +85,10 @@ export default class MainActions {
     await this._storageLoadProfile();
 
     await this._storageLoadSavedWordList();
+    
+    const noDicts = await window.api.invoke("processArgvIncludes", '--nodicts')
 
-    if (!window.api.invoke("processArgvIncludes", '--nodicts')) {
+    if (!noDicts) {
       this._setLoadingMessage('Loading dictionaries...');
 
       await this._loadDictionaries(progressMsg => {
@@ -415,7 +417,7 @@ export default class MainActions {
       throw new Error('Not allowed to delete built-in dictionary');
     }
 
-    await window.fs.unlink(dict.filename);
+    await window.api.invoke("fsUnlinkSync", dict.filename);
 
     this.state.set(this.state.get().deleteIn(['dictionaries', name]));
   };

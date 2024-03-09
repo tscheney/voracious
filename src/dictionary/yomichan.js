@@ -28,7 +28,7 @@ export const loadYomichanZip = async (fn, reportProgress) => {
     reportProgress('Opening ' + fn + '...');
   }
   console.time('load yomichan zip ' + fn);
-  const data = await window.fs.readFile(fn);
+  const data = await window.api.invoke("fsReadFileSync", fn);
   const zip = await JSZip.loadAsync(data);
   const keys = Object.keys(zip.files);
   keys.sort();
