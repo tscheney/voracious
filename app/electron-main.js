@@ -9,6 +9,8 @@ const assert = require('assert');
 const shell = require('electron').shell;
 const { execFile, spawn } = require('child_process');
 const tmp = require('tmp-promise');
+const jschardet = require('jschardet');
+const iconv = require('iconv-lite');
 
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
@@ -304,6 +306,14 @@ ipcMain.handle('childProcessSpawn', (event, ...args) => {
 ipcMain.handle('tmpFile', async (event, ...args) => {
     return await tmp.file(...args)
 })
+
+ipcMain.handle('getSubData', (event, filename) => {
+    const rawData = fs.readFileSync(filename);
+    const encodingGuess = jschardet.detect(rawData.toString('binary'));
+    console.log('loadSubtitleTrackFromFile guessed encoding', encodingGuess);
+    return iconv.decode(rawData, encodingGuess.encoding);
+})
+
 
 // In this file you can include the rest of your app's specific main process
 // code. You can also put them in separate files and require them here.

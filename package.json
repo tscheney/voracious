@@ -1,6 +1,7 @@
 {
   "name": "Voracious",
   "description": "A video player for studying foreign languages (esp. Japanese)",
+  "version": "0.6.1",
   "author": "Russel Simmons",
   "license": "MIT",
   "repository": "rsimmons/voracious",
@@ -10,7 +11,7 @@
     "franc": "^4.0.0",
     "iconv-lite": "^0.4.24",
     "immutable": "^3.8.1",
-    "jschardet": "^1.6.0",
+    "jschardet": "^3.0.0",
     "jszip": "^3.1.5",
     "node-abi": "^3.56.0",
     "react": "^16.4.2",

@@ -1,6 +1,3 @@
-import jschardet from 'jschardet';
-import iconv from 'iconv-lite';
-
 import { parseSRT, parseVTT, parseASS } from '../util/subtitleParsing';
 import { ensureKuromojiLoaded, createAutoAnnotatedText } from '../util/analysis';
 import { detectIso6393 } from '../util/languages';
@@ -228,11 +225,7 @@ export const getCollectionIndex = async (collectionLocator) => {
 
 const loadSubtitleTrackFromFile = async (filename) => {
   console.time('loadSubtitleTrackFromFile ' + filename);
-
-  const rawData = await window.api.invoke("fsReadFileSync", filename);
-  const encodingGuess = jschardet.detect(rawData.toString('binary'));
-  console.log('loadSubtitleTrackFromFile guessed encoding', encodingGuess);
-  const data = iconv.decode(rawData, encodingGuess.encoding);
+  const data = await window.api.invoke("getSubData", filename);
 
   let subs;
   if (filename.endsWith('.srt')) {
