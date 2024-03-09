@@ -1,9 +1,4 @@
 export const getUserDataPath = async () => {
-  //let userPath = "";
-  //await window.api.appGetPath("userData").then((response) => {
-  //  userPath = response;
-  //});
-  //return userPath;
   return await window.api.invoke("appGetPath", "userData")
 };
 

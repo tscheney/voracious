@@ -10,7 +10,7 @@ import SystemBrowserLink from './SystemBrowserLink.js';
 import './Settings.css';
 
 export default class Settings extends Component {
-  render() {
+  async render() {
     const {mainState, actions, history} = this.props;
 
     return (
@@ -37,7 +37,7 @@ export default class Settings extends Component {
         </div>
         <div className="Settings-section">
           <h2 className="Settings-section-title">Misc</h2>
-          <div>You're running Voracious version {window.app.getVersion()}</div>
+          <div>You're running Voracious version {await window.api.invoke("appGetVersion")}</div>
         </div>
         <div className="Settings-section">
           <h2 className="Settings-section-title">Acknowledgements</h2>

@@ -1,7 +1,8 @@
 import React from 'react';
 
-export default function SystemBrowserLink(props) {
+export default async function SystemBrowserLink(props) {
+    
   return (
-    <a href="#external" onClick={e => { e.preventDefault(); window.shell.openExternal(props.href); }}>{props.children}</a>
+    <a href="#external" onClick={e => { e.preventDefault(); window.api.invoke("shellOpenExternal", props.href); }}>{props.children}</a>
   );
 }

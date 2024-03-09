@@ -6,6 +6,9 @@ const url = require('url');
 const sqlite3 = require('sqlite3');
 const sqlite = require('sqlite');
 const assert = require('assert');
+const shell = require('electron').shell;
+const { execFile, spawn } = require('child_process');
+const tmp = require('tmp-promise');
 
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
@@ -196,12 +199,16 @@ ipcMain.handle('openDevTools', () =>
   mainWindow.webContents.openDevTools()
 )
 
-ipcMain.handle('appGetAppPath', (event) => {
+ipcMain.handle('appGetAppPath', () => {
   return path.join(app.getAppPath(), "app") 
 })
 
 ipcMain.handle('appGetPath', (event, name) => {
   return app.getPath(name)
+})
+
+ipcMain.handle('appGetVersion', () => {
+    return app.getVersion();
 })
 
 ipcMain.handle('processPlatform', () => {
@@ -282,6 +289,21 @@ ipcMain.handle('assert', async (event, ...args) => {
     return await assert(...args)
 })
 
+ipcMain.handle('shellOpenExternal', (event, ...args) => {
+    return shell.openExternal(...args);
+})
+
+ipcMain.handle('childProcessExecFile', (event, ...args) => {
+    return execFile(...args);
+})
+
+ipcMain.handle('childProcessSpawn', (event, ...args) => {
+    return spawn(...args);
+})
+
+ipcMain.handle('tmpFile', async (event, ...args) => {
+    return await tmp.file(...args)
+})
 
 // In this file you can include the rest of your app's specific main process
 // code. You can also put them in separate files and require them here.

@@ -33,7 +33,7 @@ const listVideosRel = async (baseDir, relDir) => {
     const isDirectory = await window.api.invoke("fsStatIsDirectory", absfn);
 
     if (!isDirectory) {
-      const ext = window.api.invoke("pathExtname", fn);
+      const ext = await window.api.invoke("pathExtname", fn);
       if (SUPPORTED_VIDEO_EXTENSIONS.includes(ext)) {
         videoFiles.push(fn);
       } else {
@@ -70,7 +70,7 @@ const listVideosRel = async (baseDir, relDir) => {
   for (const vfn of videoFiles) {
     const subtitleTrackIds = [];
 
-    const basevfn = window.api.invoke("pathBasename", vfn, window.api.invoke("pathExtname", vfn));
+    const basevfn = await window.api.invoke("pathBasename", vfn, await window.api.invoke("pathExtname", vfn));
 
     if (subtitleFilesMap.has(basevfn)) {
       for (const subinfo of subtitleFilesMap.get(basevfn)) {
@@ -80,7 +80,7 @@ const listVideosRel = async (baseDir, relDir) => {
 
     result.push({
       id: await window.api.invoke("pathJoin", relDir, vfn),
-      name: window.api.invoke("pathBasename", vfn, await window.api.invoke("pathExtname", vfn)),
+      name: await window.api.invoke("pathBasename", vfn, await window.api.invoke("pathExtname", vfn)),
       url: 'local://' + await window.api.invoke("pathJoin", baseDir, relDir, vfn), // this prefix works with our custom file protocol for Electron
       subtitleTrackIds,
     });
