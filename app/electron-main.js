@@ -70,7 +70,7 @@ function addIpcHandlers() {
 
 function resolveHtmlPath(htmlFileName) {
     if (process.env.NODE_ENV === 'development') {
-      const port = process.env.PORT || 1212;
+      const port = process.env.PORT || 4545;
       const url = new URL(`http://localhost:${port}`);
       url.pathname = htmlFileName;
       return url.href;
@@ -261,13 +261,13 @@ ipcMain.handle('processArgvIncludes', (event, ...args) => {
     return process.argv.includes(...args);
 })
 
-ipcMain.handle('toggleFullscreen', () => {
-    mainWindow.setFullscreen(!mainWindow.isFullScreen())
+ipcMain.on('toggleFullscreen', () => {
+    mainWindow.setFullScreen(!mainWindow.isFullScreen())
 })
 
-ipcMain.handle('windowExit', () => {
+ipcMain.on('windowExit', async () => {
     if (mainWindow.isFullScreen()) {
-        mainWindow.setFullScreen(false);
+        await mainWindow.setFullScreen(false);
     }
 })
 
