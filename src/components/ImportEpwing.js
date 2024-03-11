@@ -17,21 +17,27 @@ export default class ImportEpwing extends Component {
       statusType: 'working',
       statusText: '',
     };
-
-    window.api.send('chose-directory', this.handleIpcChoseDirectory);
   }
 
-  componentWillUnmount() {
-    window.ipcRenderer.removeListener('chose-directory', this.handleIpcChoseDirectory);
-  }
-
-  handleIpcChoseDirectory = (e, dir) => {
+  handleIpcChoseDirectory = (dir) => {
     this.setState({epwingDirectory: dir});
   };
 
   handleClickChooseDirectory = (e) => {
     e.preventDefault();
-    window.api.send('choose-directory', 'Choose EPWING folder');
+    
+    const dialogConfig = {
+        title: 'Choose EPWING folder',
+        buttonLabel: 'Choose',
+        properties: ['openDirectory']
+    };
+    window.api.invoke('dialog', 'showOpenDialog', dialogConfig)
+        .then(result => {
+            if(!result.canceled)
+            {
+              this.handleIpcChoseDirectory(result.filePaths[0])
+            }
+        });   
   };
 
   handleImport = async () => {

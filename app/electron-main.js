@@ -309,11 +309,9 @@ ipcMain.on('choose-video-file', () => {
 //   });
 //   return fn;
 // });
-app.whenReady().then(() => {
-  
+
 ipcMain.handle('dialog', (event, method, params) => {       
   return dialog[method](params);
-});
 });
 
 
