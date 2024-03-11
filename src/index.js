@@ -17,7 +17,6 @@ startLoadingKuromoji();
 const errorEmitter = new EventEmitter();
 const handleError = (error) => {
   errorEmitter.emit('error', error);
-  //window.ipcRenderer.send('open-devtools');
   window.api.send('openDevTools');
 };
 window.addEventListener('error', e => {

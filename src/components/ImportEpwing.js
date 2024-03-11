@@ -18,7 +18,7 @@ export default class ImportEpwing extends Component {
       statusText: '',
     };
 
-    window.ipcRenderer.on('chose-directory', this.handleIpcChoseDirectory);
+    window.api.send('chose-directory', this.handleIpcChoseDirectory);
   }
 
   componentWillUnmount() {
@@ -31,7 +31,7 @@ export default class ImportEpwing extends Component {
 
   handleClickChooseDirectory = (e) => {
     e.preventDefault();
-    window.ipcRenderer.send('choose-directory', 'Choose EPWING folder');
+    window.api.send('choose-directory', 'Choose EPWING folder');
   };
 
   handleImport = async () => {

@@ -15,27 +15,36 @@ export default class AddCollection extends Component {
       collectionDirectory: undefined,
     };
 
-    window.ipcRenderer.on('chose-directory', this.handleIpcChoseCollectionDirectory);
-  }
-
-  componentWillUnmount() {
-    window.ipcRenderer.removeListener('chose-directory', this.handleIpcChoseCollectionDirectory);
   }
 
   handleNameChange = (e) => {
     this.setState({collectionName: e.target.value});
   };
 
-  handleIpcChoseCollectionDirectory = async (e, dir) => {
+  handleIpcChoseCollectionDirectory = async (dir) => {
     this.setState({collectionDirectory: dir});
+    console.log(dir)
     if (!this.state.collectionName) {
+        console.log()
       this.setState({collectionName: await window.api.invoke("pathBasename", dir)});
     }
   };
 
   handleClickChooseCollectionDirectory = (e) => {
     e.preventDefault();
-    window.ipcRenderer.send('choose-directory', 'Select collection folder');
+    
+    const dialogConfig = {
+        title: 'Select collection folder',
+        buttonLabel: 'Choose',
+        properties: ['openDirectory']
+    };
+    window.api.openDialog('showOpenDialog', dialogConfig)
+        .then(result => {
+            if(!result.canceled)
+            {
+              this.handleIpcChoseCollectionDirectory(result.filePaths[0])
+            }
+        });    
   };
 
   handleAddCollection = () => {

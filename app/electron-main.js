@@ -35,39 +35,6 @@ function registerLocalProtocol() {
   })
 }
 
-function addIpcHandlers() {
-  ipcMain.on('choose-video-file', () => {
-    dialog.showOpenDialog({
-      title: 'Choose a video file',
-      buttonLabel: 'Choose',
-      filters: [{name: 'Videos', extensions: ['mp4', 'webm']}],
-      properties: ['openFile'],
-    }, files => {
-      if (files && files.length) {
-        const fn = files[0];
-        mainWindow.send('chose-video-file', fn)
-      }
-    });
-  });
-
-  ipcMain.on('choose-directory', (event, prompt) => {
-    dialog.showOpenDialog({
-      title: prompt,
-      buttonLabel: 'Choose',
-      properties: ['openDirectory'],
-    }, files => {
-      if (files && files.length) {
-        const fn = files[0];
-        mainWindow.send('chose-directory', fn)
-      }
-    });
-  });
-
-  ipcMain.on('open-devtools', () => {
-    mainWindow.webContents.openDevTools();
-  });
-}
-
 function resolveHtmlPath(htmlFileName) {
     if (process.env.NODE_ENV === 'development') {
       const port = process.env.PORT || 4545;
@@ -158,7 +125,6 @@ if (process.platform === 'darwin') {
 // Some APIs can only be used after this event occurs.
 app.on('ready', () => {
   registerLocalProtocol();
-  addIpcHandlers();
 
   const menu = Menu.buildFromTemplate(menuTemplate)
   Menu.setApplicationMenu(null); // for win/linux, but should be ignored on mac
@@ -197,7 +163,7 @@ async function dbInitialize(dbFilename)
   await db.run('CREATE TABLE IF NOT EXISTS words (word TEXT PRIMARY KEY, data TEXT)');
 }
 
-ipcMain.handle('openDevTools', () =>
+ipcMain.on('openDevTools', () =>
   mainWindow.webContents.openDevTools()
 )
 
@@ -272,7 +238,9 @@ ipcMain.on('windowExit', async () => {
 })
 
 ipcMain.handle('pathBasename', async (event, ...args) => {
-    return await path.basename(...args)
+    const pee = args[0];
+    const poo = path.basename(...args);
+    return await path.basename(...args);
 })
 
 ipcMain.handle('pathJoin', async (event, ...args) => {
@@ -313,6 +281,40 @@ ipcMain.handle('getSubData', (event, filename) => {
     console.log('loadSubtitleTrackFromFile guessed encoding', encodingGuess);
     return iconv.decode(rawData, encodingGuess.encoding);
 })
+
+ipcMain.on('choose-video-file', () => {
+    dialog.showOpenDialog({
+      title: 'Choose a video file',
+      buttonLabel: 'Choose',
+      filters: [{name: 'Videos', extensions: ['mp4', 'webm']}],
+      properties: ['openFile'],
+    }, files => {
+      if (files && files.length) {
+        const fn = files[0];
+        mainWindow.send('chose-video-file', fn)
+      }
+    });
+  });
+
+// ipcMain.handle('choose-directory', async (event, prompt) => {
+//   let fn;
+//   await dialog.showOpenDialog({
+//     title: prompt,
+//     buttonLabel: 'Choose',
+//     properties: ['openDirectory'],
+//   }, files => {
+//     if (files && files.length) {
+//       fn = files[0];
+//     }
+//   });
+//   return fn;
+// });
+app.whenReady().then(() => {
+  
+ipcMain.handle('dialog', (event, method, params) => {       
+  return dialog[method](params);
+});
+});
 
 
 // In this file you can include the rest of your app's specific main process

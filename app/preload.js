@@ -12,10 +12,13 @@ contextBridge.exposeInMainWorld('api', {
                 //}
             },
             receive: (channel, func) => {
-                //let validChannels = ["fromMain"];
-                //if (validChannels.includes(channel)) {
-                    // Deliberately strip event as it includes `sender` 
-                    ipcRenderer.on(channel, (event, ...args) => func(...args));
+                //if (Object.values(CONTENT_EVENTS.E2C).includes(channel)) {
+                  // Deliberately strip event as it includes `sender` 
+                  const subscription = (event, ...args) => func(...args);
+                  ipcRenderer.on(channel, subscription);
+                  return () => {
+                    ipcRenderer.removeListener(channel, subscription);
+                  }
                 //}
             },
             // From render to main and back again.
@@ -24,6 +27,7 @@ contextBridge.exposeInMainWorld('api', {
                 //if (validChannels.includes(channel)) {
                     return ipcRenderer.invoke(channel, ...args);
                 //}
-            }
+            },
+            openDialog: (method, config) => ipcRenderer.invoke('dialog', method, config)
         }
     );
