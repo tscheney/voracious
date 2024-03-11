@@ -27,7 +27,6 @@ contextBridge.exposeInMainWorld('api', {
                 //if (validChannels.includes(channel)) {
                     return ipcRenderer.invoke(channel, ...args);
                 //}
-            },
-            openDialog: (method, config) => ipcRenderer.invoke('dialog', method, config)
+            }
         }
     );

@@ -38,7 +38,7 @@ export default class AddCollection extends Component {
         buttonLabel: 'Choose',
         properties: ['openDirectory']
     };
-    window.api.openDialog('showOpenDialog', dialogConfig)
+    window.api.invoke('dialog', 'showOpenDialog', dialogConfig)
         .then(result => {
             if(!result.canceled)
             {
