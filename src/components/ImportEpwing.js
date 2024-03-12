@@ -19,22 +19,23 @@ export default class ImportEpwing extends Component {
     };
   }
 
-  handleIpcChoseDirectory = (dir) => {
-    this.setState({epwingDirectory: dir});
+  handleIpcChoseDirectory = (file) => {
+    this.setState({epwingDirectory: file});
   };
 
   handleClickChooseDirectory = (e) => {
     e.preventDefault();
     
     const dialogConfig = {
-        title: 'Choose EPWING folder',
+        title: 'Choose EPWING file',
         buttonLabel: 'Choose',
-        properties: ['openDirectory']
+        properties: ['openFile']
     };
     window.api.invoke('dialog', 'showOpenDialog', dialogConfig)
         .then(result => {
             if(!result.canceled)
             {
+              console.log(result)
               this.handleIpcChoseDirectory(result.filePaths[0])
             }
         });   
@@ -66,7 +67,7 @@ export default class ImportEpwing extends Component {
       console.log(e.message);
       let statusText = 'Something went wrong';
       if (e.message.includes('unrecognized dictionary format')) {
-        statusText = 'The folder you selected does not appear to be an EPWING dictionary';
+        statusText = 'The file you selected is not an EPWING dictionary';
       } else if (e.message.includes('failed to find compatible extractor')) {
         statusText = 'The EPWING you selected is not supported (see instructions above)';
       }

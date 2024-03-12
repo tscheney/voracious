@@ -41,7 +41,7 @@ export const loadDictionaries = async (reportProgress) => {
   const importedPath = await window.api.invoke("pathJoin", await getUserDataPath(), 'dictionaries');
   if (await window.api.invoke("fsExistsSync", importedPath)) {
     const userDictPath = await window.api.invoke("pathJoin", await getUserDataPath(), 'dictionaries');
-    result.push(...await scanDirForYomichanZip(userDictPath, false, reportProgress));
+    result.push(...await scanDirForYomichanZips(userDictPath, false, reportProgress));
   }
 
   return result;

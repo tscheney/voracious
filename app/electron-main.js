@@ -37,7 +37,7 @@ function registerLocalProtocol() {
 
 function resolveHtmlPath(htmlFileName) {
     if (process.env.NODE_ENV === 'development') {
-      const port = process.env.PORT || 4545;
+      const port = process.env.PORT || 1212;
       const url = new URL(`http://localhost:${port}`);
       url.pathname = htmlFileName;
       return url.href;
@@ -264,7 +264,15 @@ ipcMain.handle('shellOpenExternal', (event, ...args) => {
 })
 
 ipcMain.handle('childProcessExecFile', (event, ...args) => {
-    return execFile(...args);
+    const destFn = args[1][1];
+    return new Promise((resolve, reject) => {
+        execFile(...args, (execError, stdout, stderr) => {
+            if (execError) {
+              reject(execError);
+            }
+            resolve(true);
+          });
+        });
 })
 
 ipcMain.handle('childProcessSpawn', (event, ...args) => {

@@ -1,7 +1,7 @@
 import { getBinariesPath } from '../util/appPaths';
 
 const getBinaryFilename = async () => {
-  const ffmpegDir = await window.api.invoke("pathJoin", getBinariesPath(), 'ffmpeg');
+  const ffmpegDir = await window.api.invoke("pathJoin", await getBinariesPath(), 'ffmpeg');
   let result = await window.api.invoke("pathJoin", ffmpegDir, 'ffmpeg');
   if (process.platform === 'win32') {
     result += '.exe';

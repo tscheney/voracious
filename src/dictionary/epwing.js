@@ -1,7 +1,7 @@
 import { getBinariesPath, getUserDataPath } from '../util/appPaths';
 
 export const importEpwing = async (epwingDir) => {
-  const yomichanImportDir = await window.api.invoke("pathJoin",getBinariesPath(), 'yomichan-import');
+  const yomichanImportDir = await window.api.invoke("pathJoin", await getBinariesPath(), 'yomichan-import');
   let yomichanImport = await window.api.invoke("pathJoin",yomichanImportDir, 'yomichan-import');
   if ( await window.api.invoke("processPlatform") === 'win32') {
     yomichanImport += '.exe';
@@ -30,12 +30,6 @@ export const importEpwing = async (epwingDir) => {
   }
 
   console.log('importEpwing', yomichanImport, epwingDir, destFn);
-  return new Promise((resolve, reject) => {
-    window.api.invoke("childProcessExecFile", yomichanImport, [epwingDir, destFn], {cwd: yomichanImportDir, windowsHide: true}, (error, stdout, stderr) => {
-      if (error) {
-        reject(error);
-      }
-      resolve(destFn);
-    });
-  });
+
+  await window.api.invoke("childProcessExecFile", yomichanImport, [epwingDir, destFn], {cwd: yomichanImportDir, windowsHide: true});
 };
