@@ -33,7 +33,7 @@ class Timeline extends Component {
   render() {
     const { videoDuration, currentTime, onSlide } = this.props;
     return (
-      <input class="video_timeline" type="range" min="0" max={Math.ceil(videoDuration)} value={Math.round(currentTime)} onChange={onSlide} onFocus={this.handleFocus} ref={(el) => { this.elem = el; }} />
+      <input className="video_timeline" type="range" min="0" max={Math.ceil(videoDuration)} value={Math.round(currentTime)} onChange={onSlide} onFocus={this.handleFocus} ref={(el) => { this.elem = el; }} />
     );
   }
 }
@@ -113,11 +113,11 @@ class VideoWrapper extends Component {
     }
 
     return (
-      <div class="video_wrapper">
+      <div className="video_wrapper">
         <video src={videoURL} onTimeUpdate={e => { onTimeUpdate(e.target.currentTime); }} onPlaying={onPlaying} onPause={onPause} onEnded={onEnded} onSeeking={onSeeking} ref={(el) => { this.videoElem = el; }} onLoadedMetadata={e => { e.target.currentTime = initialTime ? initialTime : 0; }} onCanPlay={this.handleCanPlay} onClick={this.togglePause}/>
         <div className={"video_playback_controls " + class_names}>
-          <div class="play_button" onClick={this.handlePlayButton}>{play_icon}</div>
-          <span class="video_timestamp">{secondsToTimestamp(video_current_time)}&nbsp;&nbsp;/&nbsp;&nbsp;{secondsToTimestamp(video_duration)}</span>
+          <div className="play_button" onClick={this.handlePlayButton}>{play_icon}</div>
+          <span className="video_timestamp">{secondsToTimestamp(video_current_time)}&nbsp;&nbsp;/&nbsp;&nbsp;{secondsToTimestamp(video_duration)}</span>
           <Timeline videoDuration={video_duration} currentTime={video_current_time} onSlide={this.handleTimelineSlide} />
         </div>
       </div>
@@ -305,6 +305,7 @@ export default class Player extends Component {
       window.clearInterval(this.savePlaybackPositionTimer);
     }
     document.body.removeEventListener('mousemove', this.handleMouseMove);
+    window.clearTimeout(this.hideUITimer);
   }
 
   componentDidUpdate(prevProps) {
