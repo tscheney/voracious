@@ -47,15 +47,18 @@ export default class SettingsAnki extends Component {
 
   updateFromAnki = async () => {
     this.setState({statusMessage: 'Connecting...'});
-    let decks, models, modelFields;
+    let decksFromAC, modelsFromAC, modelFields;
+    let decks, models;
     try {
-      decks = await ankiConnectInvoke('deckNames', 6);
-      models = await ankiConnectInvoke('modelNames', 6);
+      decksFromAC = await ankiConnectInvoke('deckNames', 6);
+      modelsFromAC = await ankiConnectInvoke('modelNames', 6);
       modelFields = new Map();
-      for (const mn of models) {
+      for (const mn of modelsFromAC) {
         const fields = await ankiConnectInvoke('modelFieldNames', 6, {modelName: mn});
         modelFields.set(mn, fields);
-      }
+        //modelFields.push({key: mn, fields: fields,})
+        //console.log(modelFields)
+      }      
     } catch (e) {
       this.setState({
         statusMessage: e.toString(),
@@ -63,16 +66,28 @@ export default class SettingsAnki extends Component {
       return;
     }
 
-    decks.sort();
+    decksFromAC.sort();
     let selectedDeck = this.state.selectedDeck;
-    if (!selectedDeck || !decks.includes(selectedDeck)) {
-      selectedDeck = decks.length ? decks[0] : null;
+    if (!selectedDeck || !decksFromAC.includes(selectedDeck)) {
+      selectedDeck = decksFromAC.length ? decksFromAC[0] : null;
     }
 
-    models.sort();
+    modelsFromAC.sort();
     let selectedModel = this.state.selectedModel;
-    if (!selectedModel || !models.includes(selectedModel)) {
-      selectedModel = models.length ? models[0] : null;
+    if (!selectedModel || !modelsFromAC.includes(selectedModel)) {
+      selectedModel = modelsFromAC.length ? modelsFromAC[0] : null;
+    }
+    
+    decks = new Map();
+    for (let i = 0; i < decksFromAC.length; i++)
+    {
+      decks.set(i, decksFromAC[i]);
+    }
+    
+    models = new Map();
+    for (let i = 0; i < modelsFromAC.length; i++)
+    {
+        models.set(i, modelsFromAC[i]);
     }
 
     this.setState({
@@ -148,13 +163,13 @@ export default class SettingsAnki extends Component {
           <div>
             <label>Deck{' '}
             <select value={this.state.selectedDeck || ''} onChange={this.handleChangeDeck}>
-              {this.state.availableDecks.map((dn) => <option key={dn} value={dn}>{dn}</option>)}
+              {[...this.state.availableDecks.entries()].map(([k, v]) => <option key={k} value={v}>{v}</option>)}
             </select></label>
           </div>
           <div>
             <label>Note Type{' '}
             <select value={this.state.selectedModel || ''} onChange={this.handleChangeModel}>
-              {this.state.availableModels.map((mn) => <option key={mn} value={mn}>{mn}</option>)}
+              {[...this.state.availableModels.entries()].map(([k, v]) => <option key={k} value={v}>{v}</option>)}
             </select></label>
           </div>
           <div>Fields:</div>
