@@ -40,21 +40,21 @@ function resolveHtmlPath(htmlFileName) {
       url.pathname = htmlFileName;
       return url.href;
     }
-    return `file://${path.resolve(__dirname, '../renderer/', htmlFileName)}`;
+    return `file://${path.resolve(__dirname, '../public/', htmlFileName)}`;
 }
 
-async function createWindow() {
+async function createWindow() {    
   // Create the browser window.
   mainWindow = new BrowserWindow({
     width: 1280,
     height: 720,
+    icon: path.join(__dirname, '../buildResources/icon.ico'),
     webPreferences: {
-      //nodeIntegration: true,
-      //enableRemoteModule: true,
-      //nodeIntegrationInWorker: true,
-      sandbox: false,
-      preload: path.join(__dirname, 'preload.js')
-      //allowRunningInsecureContent: (serve) ? true : false
+      sandbox: false,      
+      preload: path.join(__dirname, 'preload.js'),
+      defaultFontFamily: {
+        sansSerif: "Quicksand"
+      }
     }
   });
 
