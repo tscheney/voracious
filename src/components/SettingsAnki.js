@@ -29,6 +29,7 @@ export default class SettingsAnki extends Component {
     super(props);
 
     const { ankiPrefs } = this.props;
+    this.active = false;
 
     this.state = {
       statusMessage: '',
@@ -43,10 +44,22 @@ export default class SettingsAnki extends Component {
 
   componentDidMount() {
     this.updateFromAnki();
+    this.active = true;
   }
 
+  componentWillUnmount(){
+    this.active = false;
+  }
+  
+  setStateSafe(newState) {
+    if (this.active)
+    {
+        this.setState(newState)
+    }
+  }
+  
   updateFromAnki = async () => {
-    this.setState({statusMessage: 'Connecting...'});
+    this.setStateSafe({statusMessage: 'Connecting...'});
     let decksFromAC, modelsFromAC, modelFields;
     let decks, models;
     try {
@@ -60,7 +73,7 @@ export default class SettingsAnki extends Component {
         //console.log(modelFields)
       }      
     } catch (e) {
-      this.setState({
+      this.setStateSafe({
         statusMessage: e.toString(),
       });
       return;
@@ -90,7 +103,7 @@ export default class SettingsAnki extends Component {
         models.set(i, modelsFromAC[i]);
     }
 
-    this.setState({
+    this.setStateSafe({
       statusMessage: 'Successfully connected',
       availableModels: models,
       availableModelFields: modelFields,
@@ -120,20 +133,20 @@ export default class SettingsAnki extends Component {
   handleChangeModel = (e) => {
     const modelName = e.target.value;
 
-    this.setState({
+    this.setStateSafe({
       selectedModel: modelName,
       fieldMap: this.computeFieldMap(modelName, this.state.availableModelFields),
     });
   };
 
   handleChangeDeck = (e) => {
-    this.setState({selectedDeck: e.target.value});
+    this.setStateSafe({selectedDeck: e.target.value});
   };
 
   handleFieldChange = (ankiFn, vorFn) => {
     const newFieldMap = new Map(this.state.fieldMap);
     newFieldMap.set(ankiFn, vorFn);
-    this.setState({
+    this.setStateSafe({
       fieldMap: newFieldMap,
     });
   };
