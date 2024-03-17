@@ -69,14 +69,16 @@
   }, 
   "build": {
     "productName": "Voracious",
-    "appId": "org.Voracious",
-    "asar": true,
-    "asarUnpack": "**\\*.{node,dll}",
+    "appId": "org.rsimmons.voracious",
+    "asar": false,
+    "asarUnpack": [
+        "**\\*.{node,dll}",
+        "resources/bin/**"
+    ],
     "files": [
       "dist",
       "node_modules",
       "package.json",
-      "public",
       "resources"
     ],
     "afterSign": ".erb/scripts/notarize.js",
@@ -125,7 +127,11 @@
       "output": "release/build"
     },
     "extraResources": [
-      "./assets/**"
+      "./assets/**",
+      {
+        "from": "./public/",
+        "to": "./app/dist/renderer/"
+      }
     ],
     "publish": {
       "provider": "github",
