@@ -85,14 +85,14 @@ export default class ImportEpwing extends Component {
 
     return (
       <SecondaryScreen title="Import EPWING Dictionary">
-        <div>If your EPWING dictionary is archived (e.g. a ZIP or RAR file), first unarchive it. Then choose its root folder, the one that contains the CATALOGS file. Note that Voracious relies on Yomichan Importer to import EPWINGS, and only certain specific dictionaries are supported (<SystemBrowserLink href="https://foosoft.net/projects/yomichan-import/">see the list here</SystemBrowserLink>).</div>
+        <div>If your EPWING dictionary is archived (e.g. a ZIP or RAR file), first unarchive it. Note that Voracious relies on Yomichan Importer to import EPWINGS, and only certain specific dictionaries are supported (<SystemBrowserLink href="https://foosoft.net/projects/yomichan-import/">see the list here</SystemBrowserLink>).</div>
         <br />
-        <div>Folder: {this.state.epwingDirectory || <span><i>None selected</i></span>} <button disabled={this.state.importing} onClick={this.handleClickChooseDirectory}>Choose Folder</button></div>
+        <div>File: {this.state.epwingDirectory || <span><i>None selected</i></span>} <button disabled={this.state.importing} onClick={this.handleClickChooseDirectory}>Choose File</button></div>
         <br />
         <div className={'ImportEpwing-status ImportEpwing-status-' + this.state.statusType}>{this.state.statusText}&nbsp;</div>
         <br />
         <div>
-          <Button disabled={!this.state.epwingDirectory || this.state.importing} onClick={this.handleImport}>Import Selected Folder</Button>&nbsp;
+          <Button disabled={!this.state.epwingDirectory || this.state.importing} onClick={this.handleImport}>Import Selected File</Button>&nbsp;
           <Button disabled={this.state.importing} onClick={onExit}>Back</Button>
         </div>
       </SecondaryScreen>
