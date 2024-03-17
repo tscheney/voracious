@@ -3,14 +3,14 @@ import ReactDOM from 'react-dom';
 import EventEmitter from 'events';
 
 import './index.css';
-import App from './components/App';
-import ErrorDisplay from './components/ErrorDisplay';
+import App from '../components/App';
+import ErrorDisplay from '../components/ErrorDisplay';
 
-import MainActions from './mainActions';
-import { SubscribableState, StateMapper } from './ruxx';
+import MainActions from '../mainActions';
+import { SubscribableState, StateMapper } from '../ruxx';
 
 // Load Kuromoji right away
-import { startLoadingKuromoji } from './util/analysis';
+import { startLoadingKuromoji } from '../util/analysis';
 startLoadingKuromoji();
 
 // Set some last-ditch error handlers

@@ -27,6 +27,7 @@
     "@types/terser-webpack-plugin": "^5.0.4",
     "cross-env": "^7.0.3",
     "css-loader": "^6.8.1",
+    "css-minimizer-webpack-plugin": "^5.0.1",
     "detect-port": "^1.5.1",
     "electron": "^29.0.1",
     "electron-builder": "^24.13.3",
@@ -35,6 +36,7 @@
     "icon-gen": "^4.0.0",
     "mini-css-extract-plugin": "^2.7.6",
     "react-refresh": "^0.14.0",
+    "rimraf": "^5.0.1",
     "sass": "^1.67.0",
     "sass-loader": "^13.3.2",
     "style-loader": "^3.3.3",
@@ -49,7 +51,7 @@
     "webpack-merge": "^5.9.0"
   },
   "homepage": ".",
-  "main": "app/electron-main.js",
+  "main": "./src/main/main.js",
   "scripts": {
     "build": "concurrently \"npm run build:main\" \"npm run build:renderer\"",
     "build:dll": "cross-env NODE_ENV=development TS_NODE_TRANSPILE_ONLY=true webpack --config ./.erb/configs/webpack.config.renderer.dev.dll.ts",
@@ -117,7 +119,7 @@
       "category": "Development"
     },
     "directories": {
-      "app": "app",
+      "app": "release/app",
       "buildResources": "buildResources",
       "output": "release/build"
     },

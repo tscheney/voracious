@@ -48,7 +48,7 @@ const configuration: webpack.Configuration = {
   entry: [
     `webpack-dev-server/client?http://localhost:${port}/dist`,
     'webpack/hot/only-dev-server',
-    path.join(webpackPaths.srcPath, 'index.js'),
+    path.join(webpackPaths.srcRendererPath, 'index.js'),
   ],
 
   output: {

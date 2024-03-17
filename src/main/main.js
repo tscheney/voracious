@@ -48,7 +48,7 @@ async function createWindow() {
   mainWindow = new BrowserWindow({
     width: 1280,
     height: 720,
-    icon: path.join(__dirname, '../buildResources/icon.ico'),
+    icon: path.join(__dirname, '../../buildResources/icon.ico'),
     webPreferences: {
       sandbox: false,      
       preload: path.join(__dirname, 'preload.js'),
@@ -166,7 +166,7 @@ ipcMain.on('openDevTools', () =>
 )
 
 ipcMain.handle('appGetAppPath', () => {
-  return path.join(app.getAppPath(), "app") 
+  return path.join(app.getAppPath(), "release", "app") 
 })
 
 ipcMain.handle('appGetPath', (event, name) => {
