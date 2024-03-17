@@ -122,7 +122,7 @@ const configuration: webpack.Configuration = {
 
     new HtmlWebpackPlugin({
       filename: 'index.html',
-      template: path.join(webpackPaths.srcRendererPath, 'index.ejs'),
+      template: path.join(webpackPaths.srcRendererPath, 'index.js'),
       minify: {
         collapseWhitespace: true,
         removeAttributeQuotes: true,
