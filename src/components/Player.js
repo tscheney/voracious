@@ -56,9 +56,11 @@ class VideoWrapper extends Component {
       this.videoElem.currentTime = nt >= 0 ? nt : 0;
     }
   }
-
+  
   play() {
-    this.videoElem.play();
+    this.videoElem.play().catch(e => {
+        console.log(e)
+    });
   }
 
   pause() {
@@ -68,9 +70,9 @@ class VideoWrapper extends Component {
   togglePause = () => {
     if (this.videoElem) {
       if (this.videoElem.paused) {
-        this.videoElem.play();
+        this.play();
       } else {
-        this.videoElem.pause();
+        this.pause();
       }
     }
   }
