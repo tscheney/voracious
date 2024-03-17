@@ -117,8 +117,8 @@
       "category": "Development"
     },
     "directories": {
-      "app": "release/app",
-      "buildResources": "assets",
+      "app": "app",
+      "buildResources": "buildResources",
       "output": "release/build"
     },
     "extraResources": [
