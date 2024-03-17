@@ -40,7 +40,7 @@ function resolveHtmlPath(htmlFileName) {
       url.pathname = htmlFileName;
       return url.href;
     }
-    return `file://${path.resolve(__dirname, '../public/', htmlFileName)}`;
+    return `file://${path.resolve(__dirname, '../renderer/', htmlFileName)}`;
 }
 
 async function createWindow() {    
@@ -166,7 +166,11 @@ ipcMain.on('openDevTools', () =>
 )
 
 ipcMain.handle('appGetAppPath', () => {
-  return path.join(app.getAppPath(), "release", "app") 
+  let appPath = app.getAppPath();
+  if (process.env.NODE_ENV === 'development') {
+    appPath = path.join(appPath, "release", "app")
+  }
+  return appPath;
 })
 
 ipcMain.handle('appGetPath', (event, name) => {

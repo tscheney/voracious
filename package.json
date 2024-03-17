@@ -68,15 +68,16 @@
     "start:renderer": "cross-env NODE_ENV=development TS_NODE_TRANSPILE_ONLY=true webpack serve --config ./.erb/configs/webpack.config.renderer.dev.ts"
   }, 
   "build": {
-    "productName": "ElectronReact",
-    "appId": "org.erb.ElectronReact",
+    "productName": "Voracious",
+    "appId": "org.Voracious",
     "asar": true,
     "asarUnpack": "**\\*.{node,dll}",
     "files": [
       "dist",
       "node_modules",
       "package.json",
-      "public"
+      "public",
+      "resources"
     ],
     "afterSign": ".erb/scripts/notarize.js",
     "mac": {
