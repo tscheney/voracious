@@ -21,6 +21,7 @@ let mainWindow;
 //});
 
 let db = null
+let tmpFile;
 
 // We register our own local: protocol, which behaves like file:, to allow
 //  the renderer window to play videos directly from the filesystem.
@@ -277,12 +278,66 @@ ipcMain.handle('childProcessExecFile', (event, ...args) => {
         });
 })
 
-ipcMain.handle('childProcessSpawn', (event, ...args) => {
-    return spawn(...args);
+ipcMain.handle('createMedia', async (event, ...args) => {
+  let ext;
+  const type = args[0];
+  if(type == "audio") {
+    ext = '.mp3';
+  }
+  else {
+    ext = '.jpg';
+  }
+  const binaryFilename = args[1];
+  const vidfn = args[2];
+    
+  const tmpfile = await tmp.file({keep: true, postfix: ext});
+
+  await new Promise((resolve, reject) => {
+    let subp;
+    if (type == "audio") {
+      const startTime = args[3];
+      const endTime = args[4];
+      subp = spawn(binaryFilename, ['-ss', startTime.toString(), '-i', vidfn, '-t', (endTime-startTime).toString(), '-map', '0:a:0', '-ab', '192k', '-f', 'mp3', '-y', tmpfile.path], {windowsHide: true, stdio: ['ignore', 'pipe', 'pipe']});
+    }
+    else{
+      const time = args[3];
+      subp = spawn(binaryFilename, ['-ss', time.toString(), '-i', vidfn, '-vf', "scale='min(480,iw)':'min(240,ih)':force_original_aspect_ratio=decrease", '-frames:v', '1', "-q:v", "6", '-y', tmpfile.path], {windowsHide: true, stdio: ['ignore', 'pipe', 'pipe']});   
+    }
+
+    subp.on('error', (error) => {
+      reject(error);
+    });
+
+    subp.stderr.on('data', (data) => {
+      console.log(`ffmpeg extract ${args[0]} stderr: ${data}`);
+    });
+
+    subp.on('exit', (code) => {
+      if (code) {
+        reject(new Error('ffmpeg exit code ' + code));
+      }
+      resolve();
+    });
+  });
+
+  const data = await fs.readFile(tmpfile.path);
+  const dataBase64 = Buffer.from(data, 'binary').toString('base64');
+
+  tmpfile.cleanup();
+
+  return dataBase64;
 })
 
 ipcMain.handle('tmpFile', async (event, ...args) => {
-    return await tmp.file(...args)
+    tmpFile = await tmp.file(...args);
+    return  tmpFile.path;
+})
+
+ipcMain.on('tmpFileCleanup', async () => {
+    if (tmpFile)
+    {
+        await tmpFile.cleanup();
+    }
 })
 
 ipcMain.handle('getSubData', (event, filename) => {

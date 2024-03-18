@@ -164,7 +164,7 @@ export default class PlayerExportPanel extends Component {
         try {
           await ankiConnectInvoke('storeMediaFile', 6, {
             filename: audioFilename,
-            data: fieldData.get(ankifn).toString('base64'),
+            data: fieldData.get(ankifn),
           });
         } catch (e) {
           this.setState({
@@ -184,7 +184,7 @@ export default class PlayerExportPanel extends Component {
         try {
           await ankiConnectInvoke('storeMediaFile', 6, {
             filename: imageFilename,
-            data: fieldData.get(ankifn).toString('base64'),
+            data: fieldData.get(ankifn),
           });
         } catch (e) {
           this.setState({
