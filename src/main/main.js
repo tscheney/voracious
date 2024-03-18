@@ -301,7 +301,7 @@ ipcMain.handle('createMedia', async (event, ...args) => {
     }
     else{
       const time = args[3];
-      subp = spawn(binaryFilename, ['-ss', time.toString(), '-i', vidfn, '-vf', "scale='min(480,iw)':'min(240,ih)':force_original_aspect_ratio=decrease", '-frames:v', '1', "-q:v", "6", '-y', tmpfile.path], {windowsHide: true, stdio: ['ignore', 'pipe', 'pipe']});   
+      subp = spawn(binaryFilename, ['-ss', time.toString(), '-i', vidfn, '-frames:v', '1', "-q:v", "6", '-y', tmpfile.path], {windowsHide: true, stdio: ['ignore', 'pipe', 'pipe']});   
     }
 
     subp.on('error', (error) => {
