@@ -4,7 +4,7 @@ import { getUserDataPath } from '../util/appPaths';
 //  Webpack doesn't transform it. These requires happen at runtime
 //  via Electron loading mechanisms.
 
-class ElectronSqliteBackend {
+class ElectronSqliteFrontend {
   constructor(dbFilename) {
     this.dbFilename = dbFilename;
   }
@@ -99,11 +99,11 @@ class ElectronSqliteBackend {
   }
 }
 
-export default async function createBackend() {
+export default async function createFrontend() {
   const userDataPath = await getUserDataPath();
   //const dbFilename = path.join(userDataPath, 'voracious.db');
   const dbFilename = userDataPath + "\\voracious.db";
-  const backend = new ElectronSqliteBackend(dbFilename);
-  await backend.initialize();
-  return backend;
+  const frontend = new ElectronSqliteFrontend(dbFilename);
+  await frontend.initialize();
+  return frontend;
 }

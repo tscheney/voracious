@@ -374,8 +374,6 @@ export default class Player extends Component {
   };
 
   handleVideoTimeUpdate = (time) => {
-    // console.log('time update', time, 'subsFrozen', this.subsFrozen);
-
     if (this.subsFrozen) {
       // If subs are frozen, we skip all the auto-pause logic and subtitle time updating
       return;

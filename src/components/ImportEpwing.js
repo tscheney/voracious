@@ -35,7 +35,6 @@ export default class ImportEpwing extends Component {
         .then(result => {
             if(!result.canceled)
             {
-              console.log(result)
               this.handleIpcChoseDirectory(result.filePaths[0])
             }
         });   

@@ -1,4 +1,4 @@
 // import createBackend from './webLocalStorage';
-import createBackend from './electronSqlite';
+import createFrontend from './electronSqlite';
 
-export default createBackend;
+export default createFrontend;

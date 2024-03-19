@@ -23,9 +23,7 @@ export default class AddCollection extends Component {
 
   handleIpcChoseCollectionDirectory = async (dir) => {
     this.setState({collectionDirectory: dir});
-    console.log(dir)
     if (!this.state.collectionName) {
-        console.log()
       this.setState({collectionName: await window.api.invoke("pathBasename", dir)});
     }
   };

@@ -69,8 +69,6 @@ export default class SettingsAnki extends Component {
       for (const mn of modelsFromAC) {
         const fields = await ankiConnectInvoke('modelFieldNames', 6, {modelName: mn});
         modelFields.set(mn, fields);
-        //modelFields.push({key: mn, fields: fields,})
-        //console.log(modelFields)
       }      
     } catch (e) {
       this.setStateSafe({
