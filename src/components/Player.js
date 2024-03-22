@@ -118,7 +118,7 @@ class VideoWrapper extends Component {
       <div className="video_wrapper">
         <video src={videoURL} onTimeUpdate={e => { onTimeUpdate(e.target.currentTime); }} onPlaying={onPlaying} onPause={onPause} onEnded={onEnded} onSeeking={onSeeking} ref={(el) => { this.videoElem = el; }} onLoadedMetadata={e => { e.target.currentTime = initialTime ? initialTime : 0; }} onCanPlay={this.handleCanPlay} onClick={this.togglePause}/>
         <div className={"video_playback_controls " + class_names}>
-          <div className="play_button" onClick={this.handlePlayButton}>{play_icon}</div>
+          <div className="play_button" id="myPlayButton" onClick={this.handlePlayButton}>{play_icon}</div>
           <span className="video_timestamp">{secondsToTimestamp(video_current_time)}&nbsp;&nbsp;/&nbsp;&nbsp;{secondsToTimestamp(video_duration)}</span>
           <Timeline videoDuration={video_duration} currentTime={video_current_time} onSlide={this.handleTimelineSlide} />
         </div>
@@ -146,7 +146,7 @@ class PlayControls extends Component {
       return;
     }
 
-    const { onBack, onAhead, onReplay, onTogglePause, onContinue, onToggleRuby, onMainSubTransient, onRubyTransient, onToggleHelp, onNumberKey, onExportCard, onToggleFullscreen } = this.props;
+    const { onBack, onAhead, onReplay, onTogglePause, onContinue, onToggleRuby, onMainSubTransient, onToggleUIHidden, onRubyTransient, onToggleHelp, onNumberKey, onExportCard, onToggleFullscreen } = this.props;
 
     if (!e.repeat) {
       if ((e.keyCode >= 49) && (e.keyCode <= 57)) {
@@ -196,8 +196,12 @@ class PlayControls extends Component {
             e.preventDefault();
             break;
 
-          case 191: // Forward slash
+          case 190: // Period
             onMainSubTransient(true);
+            break;
+            
+          case 191: // Forward slash
+            onToggleUIHidden();
             break;
 
           case 16: // Shift
@@ -229,7 +233,7 @@ class PlayControls extends Component {
 
     if (!e.repeat) {
       switch (e.keyCode) {
-        case 191: // Forward slash
+        case 190: // Period
           onMainSubTransient(false);
           break;
 
@@ -285,6 +289,7 @@ export default class Player extends Component {
       transientSubsOn: false,
       transientRubyOn: false,
       noAudio: false,
+      mouseHidden: false,
       controlsHidden: false,
       exporting: null,
     };
@@ -298,8 +303,9 @@ export default class Player extends Component {
     this.props.onNeedSubtitles();
     this.restorePlaybackPosition();
     document.body.addEventListener('mousemove', this.handleMouseMove);
-    this.handleMouseMove();
     this.savePlaybackPositionTimer = window.setInterval(this.savePlaybackPosition, 1000);
+    this.hideUITimer = window.setTimeout(this.handleControlsMouseMoveTimeout, 2000);
+    this.hideMouseTimer = window.setTimeout(this.handleMouseMoveTimeout, 2000);
   }
 
   componentWillUnmount() {
@@ -308,6 +314,7 @@ export default class Player extends Component {
     }
     document.body.removeEventListener('mousemove', this.handleMouseMove);
     window.clearTimeout(this.hideUITimer);
+    window.clearTimeout(this.hideMouseTimer);
   }
 
   componentDidUpdate(prevProps) {
@@ -322,15 +329,33 @@ export default class Player extends Component {
     }
   }
 
-  handleMouseMove = () => {
-    this.setState({ controlsHidden: false });
-    window.clearTimeout(this.hideUITimer);
-    this.hideUITimer = window.setTimeout(this.handleMouseMoveTimeout, 2000);
+  handleMouseMove = (e) => {
+    const playButtonRect = document.getElementById("myPlayButton").getBoundingClientRect();
+    const exitButtonRect = document.getElementById("myExitButton").getBoundingClientRect();
+    
+    if (e.y < exitButtonRect.bottom || e.y > playButtonRect.top) {
+        this.setState({ controlsHidden: false });
+        window.clearTimeout(this.hideUITimer);
+        this.hideUITimer = window.setTimeout(this.handleControlsMouseMoveTimeout, 2000);
+        window.clearTimeout(this.hideMouseTimer);
+        this.hideMouseTimer = window.setTimeout(this.handleMouseMoveTimeout, 2000);
+    }
+    
+    this.setState({ mouseHidden: false });
+    if(this.state.controlsHidden) {
+        window.clearTimeout(this.hideMouseTimer);
+        this.hideMouseTimer = window.setTimeout(this.handleMouseMoveTimeout, 500);
+    }
   };
 
-  handleMouseMoveTimeout = () => {
+  handleControlsMouseMoveTimeout = () => {
     this.setState({ controlsHidden: true });
     window.clearTimeout(this.hideUITimer);
+  };
+  
+  handleMouseMoveTimeout = () => {
+    this.setState({ mouseHidden: true });
+    window.clearTimeout(this.hideMouseTimer);
   };
 
   getOrderedSubtitleTracks = () => {
@@ -641,6 +666,34 @@ export default class Player extends Component {
       }
     }
   };
+  
+  toggleUIHidden = () => {
+    window.clearTimeout(this.hideUITimer);
+    window.clearTimeout(this.hideMouseTimer);
+    if (this.state.controlsHidden) {
+        this.setState({
+          controlsHidden: false,
+          mouseHidden: false,
+        });
+        this.hideUITimer = window.setTimeout(this.handleControlsMouseMoveTimeout, 2000);
+        this.hideMouseTimer = window.setTimeout(this.handleMouseMoveTimeout, 2000);
+    }
+    else {
+        this.setState({
+          controlsHidden: true,
+          mouseHidden: true,
+        });
+    }
+  }
+
+  componentWillUnmount() {
+    if (this.savePlaybackPositionTimer) {
+      window.clearInterval(this.savePlaybackPositionTimer);
+    }
+    document.body.removeEventListener('mousemove', this.handleMouseMove);
+    window.clearTimeout(this.hideUITimer);
+    window.clearTimeout(this.hideMouseTimer);
+  }
 
   handleToggleHelp = () => {
     const { preferences, onSetPreference } = this.props;
@@ -700,7 +753,7 @@ export default class Player extends Component {
   render() {
     const { video } = this.props;
 
-    var playerStyle = this.state.controlsHidden ? {
+    var playerStyle = this.state.mouseHidden ? {
       cursor: 'none',
     } : {};
 
@@ -738,10 +791,10 @@ export default class Player extends Component {
               })}
             </div>
           </div>
-          <PlayControls onBack={this.handleBack} onAhead={this.handleAhead} onReplay={this.handleReplay} onTogglePause={this.handleTogglePause} onContinue={this.handleContinue} onToggleRuby={this.handleToggleRuby} onMainSubTransient={this.handleMainSubTransient} onRubyTransient={this.handleRubyTransient} onToggleHelp={this.handleToggleHelp} onNumberKey={this.handleNumberKey} onExportCard={this.handleExportCard} onToggleFullscreen={this.handleToggleFullscreen} />
+          <PlayControls onBack={this.handleBack} onAhead={this.handleAhead} onReplay={this.handleReplay} onTogglePause={this.handleTogglePause} onContinue={this.handleContinue} onToggleRuby={this.handleToggleRuby} onMainSubTransient={this.handleMainSubTransient} onToggleUIHidden={this.toggleUIHidden} onRubyTransient={this.handleRubyTransient} onToggleHelp={this.handleToggleHelp} onNumberKey={this.handleNumberKey} onExportCard={this.handleExportCard} onToggleFullscreen={this.handleToggleFullscreen} />
         </div>
         {(
-          <button className={this.state.controlsHidden ? "Player-big-button Player-exit-button controls-hide" : "Player-big-button Player-exit-button"} onClick={this.handleExit}>↩</button>
+          <button className={this.state.controlsHidden ? "Player-big-button Player-exit-button controls-hide" : "Player-big-button Player-exit-button"} id="myExitButton" onClick={this.handleExit}>↩</button>
         )}
         {(
           <div className={this.state.controlsHidden ? "Player-subtitle-controls-panel controls-hide" : "Player-subtitle-controls-panel"}>
@@ -763,6 +816,7 @@ export default class Player extends Component {
               <tr><td>Toggle Fullscreen:</td><td>F</td></tr>
               <tr><td>Toggle Furigana/Ruby:</td><td>R / `</td></tr>
               <tr><td>Toggle Help:</td><td>H</td></tr>
+              <tr><td>Toggle UI:</td><td>/</td></tr>
               {(this.state.subtitleMode === 'manual') ? (
                 <tr><td>Hide/Show<br />Sub Track:</td><td>[1-9]</td></tr>
               ) : null}
