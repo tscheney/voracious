@@ -146,7 +146,7 @@ class PlayControls extends Component {
       return;
     }
 
-    const { onBack, onAhead, onReplay, onTogglePause, onContinue, onToggleRuby, onMainSubTransient, onToggleUIHidden, onRubyTransient, onToggleHelp, onNumberKey, onExportCard, onToggleFullscreen } = this.props;
+    const { onExit, onBack, onAhead, onReplay, onTogglePause, onContinue, onToggleRuby, onMainSubTransient, onToggleUIHidden, onRubyTransient, onToggleHelp, onNumberKey, onExportCard, onToggleFullscreen } = this.props;
 
     if (!e.repeat) {
       if ((e.keyCode >= 49) && (e.keyCode <= 57)) {
@@ -154,6 +154,11 @@ class PlayControls extends Component {
         e.preventDefault();
       } else {
         switch (e.keyCode) {
+          case 27: // escape
+            onExit();
+            e.preventDefault();
+            break;
+            
           case 37: // left arrow
             onBack();
             e.preventDefault();
@@ -791,7 +796,7 @@ export default class Player extends Component {
               })}
             </div>
           </div>
-          <PlayControls onBack={this.handleBack} onAhead={this.handleAhead} onReplay={this.handleReplay} onTogglePause={this.handleTogglePause} onContinue={this.handleContinue} onToggleRuby={this.handleToggleRuby} onMainSubTransient={this.handleMainSubTransient} onToggleUIHidden={this.toggleUIHidden} onRubyTransient={this.handleRubyTransient} onToggleHelp={this.handleToggleHelp} onNumberKey={this.handleNumberKey} onExportCard={this.handleExportCard} onToggleFullscreen={this.handleToggleFullscreen} />
+          <PlayControls onExit={this.handleExit} onBack={this.handleBack} onAhead={this.handleAhead} onReplay={this.handleReplay} onTogglePause={this.handleTogglePause} onContinue={this.handleContinue} onToggleRuby={this.handleToggleRuby} onMainSubTransient={this.handleMainSubTransient} onToggleUIHidden={this.toggleUIHidden} onRubyTransient={this.handleRubyTransient} onToggleHelp={this.handleToggleHelp} onNumberKey={this.handleNumberKey} onExportCard={this.handleExportCard} onToggleFullscreen={this.handleToggleFullscreen} />
         </div>
         {(
           <button className={this.state.controlsHidden ? "Player-big-button Player-exit-button controls-hide" : "Player-big-button Player-exit-button"} id="myExitButton" onClick={this.handleExit}>↩</button>
