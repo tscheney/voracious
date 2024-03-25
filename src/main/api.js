@@ -99,13 +99,15 @@ export default function registerIpcApi(mainWindow){
   })
   
   ipcMain.handle('childProcessExecFile', (event, ...args) => {
-      const destFn = args[1][1];
       return new Promise((resolve, reject) => {
           execFile(...args, (execError, stdout, stderr) => {
               if (execError) {
                 reject(execError);
               }
-              resolve(true);
+              resolve({
+                out: stdout,
+                error: stderr,
+              });
             });
           });
   })

@@ -7,6 +7,7 @@ import './Player.css';
 import Select from './Select.js';
 import AnnoText from './AnnoText.js';
 import PlayerExportPanel from './PlayerExportPanel';
+import { extractChapters } from "../util/ffmpeg"
 
 import { getChunkAtTime, getPrevChunkAtTime, getNextChunkAtTime } from '../util/chunk';
 
@@ -29,11 +30,10 @@ class Timeline extends Component {
     }
   }
 
-
   render() {
     const { videoDuration, currentTime, onSlide } = this.props;
     return (
-      <input className="video_timeline" type="range" min="0" max={Math.ceil(videoDuration)} value={Math.round(currentTime)} onChange={onSlide} onFocus={this.handleFocus} ref={(el) => { this.elem = el; }} />
+      <input className="video_timeline" id="myTimeline" type="range" min="0" max={Math.ceil(videoDuration)} value={Math.round(currentTime)} onChange={onSlide} onFocus={this.handleFocus} ref={(el) => { this.elem = el; }} />
     );
   }
 }
@@ -53,7 +53,8 @@ class VideoWrapper extends Component {
   seekRelative(dt) {
     if (this.videoElem) {
       const nt = this.videoElem.currentTime + dt;
-      this.videoElem.currentTime = nt >= 0 ? nt : 0;
+      const seekTime = nt >= 0 ? nt : 0;
+      this.seek(seekTime);
     }
   }
   
@@ -116,7 +117,7 @@ class VideoWrapper extends Component {
 
     return (
       <div className="video_wrapper">
-        <video src={videoURL} onTimeUpdate={e => { onTimeUpdate(e.target.currentTime); }} onPlaying={onPlaying} onPause={onPause} onEnded={onEnded} onSeeking={onSeeking} ref={(el) => { this.videoElem = el; }} onLoadedMetadata={e => { e.target.currentTime = initialTime ? initialTime : 0; }} onCanPlay={this.handleCanPlay} onClick={this.togglePause}/>
+        <video id="myVideo" src={videoURL} onTimeUpdate={e => { onTimeUpdate(e.target.currentTime); }} onPlaying={onPlaying} onPause={onPause} onEnded={onEnded} onSeeking={onSeeking} ref={(el) => { this.videoElem = el; }} onLoadedMetadata={e => { e.target.currentTime = initialTime ? initialTime : 0; }} onCanPlay={this.handleCanPlay} onClick={this.togglePause}/>
         <div className={"video_playback_controls " + class_names}>
           <div className="play_button" id="myPlayButton" onClick={this.handlePlayButton}>{play_icon}</div>
           <span className="video_timestamp">{secondsToTimestamp(video_current_time)}&nbsp;&nbsp;/&nbsp;&nbsp;{secondsToTimestamp(video_duration)}</span>
@@ -146,7 +147,7 @@ class PlayControls extends Component {
       return;
     }
 
-    const { onExit, onBack, onAhead, onReplay, onTogglePause, onContinue, onToggleRuby, onMainSubTransient, onToggleUIHidden, onRubyTransient, onToggleHelp, onNumberKey, onExportCard, onToggleFullscreen } = this.props;
+    const { onExit, onPrevChapter, onNextChapter, onBack, onAhead, onReplay, onTogglePause, onContinue, onToggleRuby, onMainSubTransient, onToggleUIHidden, onRubyTransient, onToggleHelp, onNumberKey, onExportCard, onToggleFullscreen } = this.props;
 
     if (!e.repeat) {
       if ((e.keyCode >= 49) && (e.keyCode <= 57)) {
@@ -156,6 +157,16 @@ class PlayControls extends Component {
         switch (e.keyCode) {
           case 27: // escape
             onExit();
+            e.preventDefault();
+            break;
+          
+          case 33: // page up
+            onPrevChapter();
+            e.preventDefault();
+            break;
+            
+          case 34: // page down
+            onNextChapter();
             e.preventDefault();
             break;
             
@@ -282,6 +293,10 @@ export default class Player extends Component {
     super(props);
     this.videoMediaComponent = undefined;
     this.firstAnnoTextComponent = undefined;
+    extractChapters(props.video.videoURL).then(data => {
+      this.chapters = data;
+      this.addChaptersToSeekbar();
+    });
 
     const subtitleMode = props.preferences.subtitleMode;
     const subtitleState = this.initialSubtitleState(subtitleMode);
@@ -302,12 +317,14 @@ export default class Player extends Component {
     this.videoTime = null;
     this.videoIsPlaying = false;
     this.subsFrozen = false;
+    this.video = null;
   }
 
   componentDidMount() {
     this.props.onNeedSubtitles();
     this.restorePlaybackPosition();
     document.body.addEventListener('mousemove', this.handleMouseMove);
+    this.video = document.getElementById('myVideo');
     this.savePlaybackPositionTimer = window.setInterval(this.savePlaybackPosition, 1000);
     this.hideUITimer = window.setTimeout(this.handleControlsMouseMoveTimeout, 2000);
     this.hideMouseTimer = window.setTimeout(this.handleMouseMoveTimeout, 2000);
@@ -331,6 +348,39 @@ export default class Player extends Component {
     // this check is probably not perfect.. technically could have same id in different collection?
     if (this.props.video.id !== prevProps.video.id) {
       this.restorePlaybackPosition();
+    }
+    if (this.chapters && this.video)
+    {
+      this.updateChapterSeekbarLocations();
+    }
+  }
+  
+  addChaptersToSeekbar = () => {
+    const controls = document.getElementById('myTimeline').offsetParent;
+
+    for (const chapter of this.chapters) {
+      if (chapter.start <= this.video.duration) {
+        const marker = document.createElement('span');
+        marker.classList.add("chapter");
+        controls.appendChild(marker);
+      }
+    }
+    
+    this.updateChapterSeekbarLocations();
+  }
+  
+  updateChapterSeekbarLocations = () =>
+  {
+    const timeline = document.getElementById('myTimeline');
+    const controls = timeline.offsetParent;
+    const children = controls.getElementsByClassName("chapter");
+    const children2 = controls.querySelectorAll(".chapter");
+    
+    for (var i = 0; i < children.length; i++) {
+        const chapter = this.chapters[i];
+        const leftPixels = (chapter.start / this.video.duration) * timeline.offsetWidth + timeline.offsetLeft;
+        const left = (leftPixels / controls.offsetWidth ) * 100 + '%';
+        children[i].style.left = left;
     }
   }
 
@@ -369,9 +419,6 @@ export default class Player extends Component {
 
   restorePlaybackPosition = async () => {
     const position = await this.props.getSavedPlaybackPosition();
-    if (this.videoElem) {
-      this.videoElem.seek(position);
-    }
   };
 
   initialSubtitleState = (mode) => {
@@ -627,6 +674,34 @@ export default class Player extends Component {
         throw new Error('internal error');
     }
   };
+  
+  handlePrevChapter = () => {
+    if (this.chapters !== null && this.chapters !== undefined) {
+      if (this.videoTime !== null && this.videoTime !== undefined) {
+        let prevChapterStart = 0;
+        for (const chapter of this.chapters) {
+          if (chapter.start > this.videoTime - 2) {// allow 2 seconds to go back
+            break;
+          }
+          prevChapterStart = chapter.start;
+        }
+        this.videoMediaComponent.seek(prevChapterStart);
+      }
+    }
+  };
+  
+  handleNextChapter = () => {
+    if (this.chapters !== null && this.chapters !== undefined) {
+      if (this.videoTime !== null && this.videoTime !== undefined) {
+        for (const chapter of this.chapters) {
+          if (chapter.start > this.videoTime + 0.001) { // add buffer for float error
+            this.videoMediaComponent.seek(chapter.start);
+            break;
+          }
+        }
+      }
+    }
+  };
 
   handleToggleRuby = () => {
     const { preferences, onSetPreference } = this.props;
@@ -761,6 +836,14 @@ export default class Player extends Component {
     var playerStyle = this.state.mouseHidden ? {
       cursor: 'none',
     } : {};
+    
+    if (this.video && !isNaN(this.video.duration))
+    {
+      const slideTranslateX = (this.video.currentTime / this.video.duration * 100 - 50) + '%';
+      
+      document.getElementById("myTimeline").style.setProperty('--slidetranslatex', slideTranslateX);
+    }
+    
 
     return (
       <div className="Player" style={playerStyle}>
@@ -796,7 +879,7 @@ export default class Player extends Component {
               })}
             </div>
           </div>
-          <PlayControls onExit={this.handleExit} onBack={this.handleBack} onAhead={this.handleAhead} onReplay={this.handleReplay} onTogglePause={this.handleTogglePause} onContinue={this.handleContinue} onToggleRuby={this.handleToggleRuby} onMainSubTransient={this.handleMainSubTransient} onToggleUIHidden={this.toggleUIHidden} onRubyTransient={this.handleRubyTransient} onToggleHelp={this.handleToggleHelp} onNumberKey={this.handleNumberKey} onExportCard={this.handleExportCard} onToggleFullscreen={this.handleToggleFullscreen} />
+          <PlayControls onExit={this.handleExit} onPrevChapter={this.handlePrevChapter} onNextChapter={this.handleNextChapter} onBack={this.handleBack} onAhead={this.handleAhead} onReplay={this.handleReplay} onTogglePause={this.handleTogglePause} onContinue={this.handleContinue} onToggleRuby={this.handleToggleRuby} onMainSubTransient={this.handleMainSubTransient} onToggleUIHidden={this.toggleUIHidden} onRubyTransient={this.handleRubyTransient} onToggleHelp={this.handleToggleHelp} onNumberKey={this.handleNumberKey} onExportCard={this.handleExportCard} onToggleFullscreen={this.handleToggleFullscreen} />
         </div>
         {(
           <button className={this.state.controlsHidden ? "Player-big-button Player-exit-button controls-hide" : "Player-big-button Player-exit-button"} id="myExitButton" onClick={this.handleExit}>↩</button>
@@ -822,6 +905,8 @@ export default class Player extends Component {
               <tr><td>Toggle Furigana/Ruby:</td><td>R / `</td></tr>
               <tr><td>Toggle Help:</td><td>H</td></tr>
               <tr><td>Toggle UI:</td><td>/</td></tr>
+              <tr><td>Previous Chapter:</td><td>PgUp</td></tr>
+              <tr><td>Next Chapter:</td><td>PgDn</td></tr>
               {(this.state.subtitleMode === 'manual') ? (
                 <tr><td>Hide/Show<br />Sub Track:</td><td>[1-9]</td></tr>
               ) : null}

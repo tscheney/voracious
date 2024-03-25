@@ -1,7 +1,7 @@
 {
   "name": "Voracious",
   "description": "A video player for studying foreign languages (esp. Japanese)",
-  "version": "0.6.1",
+  "version": "0.8.0",
   "author": "Russel Simmons",
   "license": "MIT",
   "repository": "rsimmons/voracious",
