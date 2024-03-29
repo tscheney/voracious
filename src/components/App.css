@@ -157,3 +157,20 @@
   width: 1em;
   margin-left: -1em;
 }
+
+.App-right{
+    float:right;
+}
+.App-right button{
+  vertical-align: middle;
+  padding: 0.3em 0.7em;
+  border: 1px solid #aaa;
+  color: black;
+  background: white;
+  border-radius: 0.2em;
+  cursor: pointer;
+}
+
+.App-right button:hover:enabled {
+  background: #ddd;
+}

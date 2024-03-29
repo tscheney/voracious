@@ -83,7 +83,15 @@ class App extends Component {
                       return (
                         <div>
                           <div className="App-collection-header">
-                            <h2 className="App-collection-header-title"><a href="/library" onClick={e => {e.preventDefault(); history.goBack();}} className="App-back-to-library-link">{collection.name}</a> / {title.name}</h2>
+                            <h2 className="App-collection-header-title"><a href="/library" onClick={e => {e.preventDefault(); history.goBack();}} className="App-back-to-library-link">{collection.name}</a> / {title.name}
+                              <span className="App-right">
+                                <button onClick={e => {
+                                  e.preventDefault();                                
+                                  actions._storageLoadProfile();
+                                  }}>Refresh Collection
+                                </button>
+                              </span>
+                            </h2>
                           </div>
                           {title.parts.seasonEpisodes.length ? (
                             <ul>
@@ -121,7 +129,15 @@ class App extends Component {
                                     actions.removeCollection(collection.locator);
                                   }
                                 }}>Delete</button>{' '}
-                              </span></h2>
+                                </span>
+                                <span className="App-right">
+                                  <button onClick={e => {
+                                    e.preventDefault();                                
+                                    actions._storageLoadProfile();
+                                    }}>Refresh Collection
+                                  </button>
+                                </span>
+                              </h2>
                               <div className="App-collection-id">{collection.locator}</div>
                             </div>
                             <ul>
