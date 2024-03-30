@@ -356,31 +356,35 @@ export default class Player extends Component {
   }
   
   addChaptersToSeekbar = () => {
-    const controls = document.getElementById('myTimeline').offsetParent;
-
-    for (const chapter of this.chapters) {
-      if (chapter.start <= this.video.duration) {
-        const marker = document.createElement('span');
-        marker.classList.add("chapter");
-        controls.appendChild(marker);
+    const timeline = document.getElementById('myTimeline')
+    if (timeline) {
+      const controls = timeline.offsetParent;
+      
+      for (const chapter of this.chapters) {
+        if (chapter.start <= this.video.duration) {
+          const marker = document.createElement('span');
+          marker.classList.add("chapter");
+          controls.appendChild(marker);
+        }
       }
+      this.updateChapterSeekbarLocations();
     }
-    
-    this.updateChapterSeekbarLocations();
   }
   
   updateChapterSeekbarLocations = () =>
   {
     const timeline = document.getElementById('myTimeline');
-    const controls = timeline.offsetParent;
-    const children = controls.getElementsByClassName("chapter");
-    const children2 = controls.querySelectorAll(".chapter");
-    
-    for (var i = 0; i < children.length; i++) {
+    if (timeline) {
+      const controls = timeline.offsetParent;
+      const children = controls.getElementsByClassName("chapter");
+      const children2 = controls.querySelectorAll(".chapter");
+      
+      for (var i = 0; i < children.length; i++) {
         const chapter = this.chapters[i];
         const leftPixels = (chapter.start / this.video.duration) * timeline.offsetWidth + timeline.offsetLeft;
         const left = (leftPixels / controls.offsetWidth ) * 100 + '%';
         children[i].style.left = left;
+      }
     }
   }
 
