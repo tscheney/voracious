@@ -66,32 +66,30 @@ export default function registerIpcApi(mainWindow){
       mainWindow.setFullScreen(!mainWindow.isFullScreen())
   })
   
-  ipcMain.on('windowExit', async () => {
+  ipcMain.on('windowExit', () => {
       if (mainWindow.isFullScreen()) {
-          await mainWindow.setFullScreen(false);
+          mainWindow.setFullScreen(false);
       }
   })
   
-  ipcMain.handle('pathBasename', async (event, ...args) => {
-      const pee = args[0];
-      const poo = path.basename(...args);
-      return await path.basename(...args);
+  ipcMain.handle('pathBasename', (event, ...args) => {
+      return path.basename(...args);
   })
   
-  ipcMain.handle('pathJoin', async (event, ...args) => {
-      return await path.join(...args)
+  ipcMain.handle('pathJoin', (event, ...args) => {
+      return path.join(...args)
   })
   
-  ipcMain.handle('pathExtname', async (event, dir) => {
-      return await path.extname(dir)
+  ipcMain.handle('pathExtname', (event, dir) => {
+      return path.extname(dir)
   })
   
-  ipcMain.handle('pathParse', async (event, dir) => {
-      return await path.parse(dir)
+  ipcMain.handle('pathParse', (event, dir) => {
+      return path.parse(dir)
   })
   
-  ipcMain.handle('assert', async (event, ...args) => {
-      return await assert(...args)
+  ipcMain.handle('assert', (event, ...args) => {
+      return assert(...args)
   })
   
   ipcMain.handle('shellOpenExternal', (event, ...args) => {
