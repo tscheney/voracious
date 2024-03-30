@@ -59,13 +59,59 @@ class App extends Component {
             <Route path="/player/:cloc/:vid" render={({ match, history }) => {
               const collectionLocator = decodeURIComponent(match.params.cloc);
               const videoId = decodeURIComponent(match.params.vid);
-              return <Player video={mainState.collections.get(collectionLocator).videos.get(videoId)} onExit={() => { history.push('/library'); }} onUpdatePlaybackPosition={(pos) => { actions.saveVideoPlaybackPosition(collectionLocator, videoId, pos); }} onNeedSubtitles={() => { actions.loadSubtitlesIfNeeded(collectionLocator, videoId); }} getSavedPlaybackPosition={() => { return actions.loadVideoPlaybackPosition(collectionLocator, videoId); }} onSetPreference={(pref, value) => { actions.setPreference(pref, value); }} preferences={mainState.preferences} sortFilterSubtitleTracksMap={actions.sortFilterSubtitleTracksMap} searchDictionaries={actions.searchDictionaries} getWordFromList = {actions.getWordFromList} setWordInList={actions.setWordInList} onExtractAudio={(startTime, endTime) => extractAudioFromVideo(collectionLocator, videoId, startTime, endTime)} onExtractFrameImage={(time) => extractFrameImageFromVideo(collectionLocator, videoId, time)} ankiPrefs={mainState.preferences.anki} />;
+              const collection = mainState.collections.get(collectionLocator);
+              if (collection === null || collection === undefined) {
+                return <div></div>;
+              }
+              return (
+                <Player 
+                  video={mainState.collections.get(collectionLocator).videos.get(videoId)} 
+                  onExit={() => history.push('/library')} 
+                  onUpdatePlaybackPosition={(pos) => { 
+                    actions.saveVideoPlaybackPosition(collectionLocator, videoId, pos); 
+                  }} 
+                  onNeedSubtitles={() =>
+                    actions.loadSubtitlesIfNeeded(collectionLocator, videoId)
+                  }
+                  getSavedPlaybackPosition={() =>
+                    actions.loadVideoPlaybackPosition(collectionLocator, videoId)
+                  }
+                  onSetPreference={(pref, value) => { 
+                    actions.setPreference(pref, value); 
+                  }} 
+                  preferences={mainState.preferences} 
+                  sortFilterSubtitleTracksMap={actions.sortFilterSubtitleTracksMap} 
+                  searchDictionaries={actions.searchDictionaries}
+                  getWordFromList = {actions.getWordFromList}
+                  setWordInList={actions.setWordInList} 
+                  onExtractAudio={(startTime, endTime) => 
+                    extractAudioFromVideo(collectionLocator, videoId, startTime, endTime)
+                  } 
+                  onExtractFrameImage={(time) => 
+                    extractFrameImageFromVideo(collectionLocator, videoId, time)
+                  } 
+                  ankiPrefs={mainState.preferences.anki} 
+                />
+              );
             }}/>
             <Route path="/add_collection" render={({ history }) => {
-              return <AddCollection onAdd={(name, dir) => { actions.addLocalCollection(name, dir); history.replace('/library'); }} onExit={() => { history.goBack(); }} />;
+              return (
+                <AddCollection 
+                  onAdd={(name, dir) => { 
+                    actions.addLocalCollection(name, dir); 
+                    history.replace('/library'); 
+                  }} 
+                  onExit={() => history.goBack()}  
+                />
+              );
             }}/>
             <Route path="/import_epwing" render={({ history }) => {
-              return <ImportEpwing onExit={() => { history.goBack(); }} onReloadDictionaries={actions.reloadDictionaries} />;
+              return (
+                <ImportEpwing 
+                  onExit={() => history.goBack()} 
+                  onReloadDictionaries={actions.reloadDictionaries} 
+                />
+              );
             }}/>
             <Route render={({ history }) => (
               <WidthWrapper>
@@ -79,6 +125,9 @@ class App extends Component {
                       const collectionLocator = decodeURIComponent(match.params.cloc);
                       const titleName = decodeURIComponent(match.params.tname);
                       const collection = mainState.collections.get(collectionLocator);
+                      if (collection === null || collection === undefined) {
+                        return <div></div>;
+                      }
                       const title = collection.titles.find(t => t.name === titleName); // unindexed, but should be quick
                       return (
                         <div>
