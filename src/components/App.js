@@ -49,10 +49,6 @@ const VideoListItem = (props) => {
 class App extends Component {
   render() {
     const { mainState, actions } = this.props;
-
-    if (mainState.modalLoadingMessage) {
-      return <WidthWrapper><h1 className="header-font">{mainState.modalLoadingMessage}</h1></WidthWrapper>;
-    } else {
       return (
         <Router><ScrollContext>
           <Switch>
@@ -204,11 +200,14 @@ class App extends Component {
                           </li>
                         ))}
                       </ul>
-                    ) : (
+                    ) : (mainState.collectionLoaded) ? (
                       <div className="App-no-collections-message">
                         To get started, <Link to="/add_collection">Add A Collection</Link> to your library.
                       </div>
-                    )}/>
+                    ) : (
+                      <div className="header-font">Loading...</div>
+                    )
+                  }/>
                     <Route path="/settings" render={({history}) => (
                       <Settings mainState={mainState} actions={actions} history={history} />
                     )}/>
@@ -221,7 +220,6 @@ class App extends Component {
         </ScrollContext></Router>
       );
     }
-  }
 }
 
 export default App;

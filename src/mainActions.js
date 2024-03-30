@@ -25,11 +25,11 @@ const PreferencesRecord = new Record({
 });
 
 const MainStateRecord = new Record({
-  modalLoadingMessage: null,
   collections: new IMap(), // locator -> CollectionRecord
   dictionaries: new IMap(), // name -> object that we don't mutate (TODO: make it a Record)
   wordList: new IMap(), // word -> SavedWordRecord
   preferences: new PreferencesRecord(),
+  collectionLoaded: false,
 });
 
 const CollectionRecord = new Record({
@@ -151,6 +151,9 @@ export default class MainActions {
       );
       Promise.all(addCollectionPromises).then(() =>
         console.timeEnd('add collections'),
+      )
+      .finally(() =>
+        this.state.set(this.state.get().set('collectionLoaded', true)),
       );
 
       this.state.set(this.state.get().setIn(['preferences', 'showRuby'], profile.preferences.showRuby));
