@@ -78,11 +78,6 @@ export default class MainActions {
   initializeState = async () => {
     this.state.set(new MainStateRecord());
 
-    // Initialize the storage asynchronously so that we don't block app startup.
-    // Once that's done, load the profile from the storage.
-    // The dictionaries are not needed for app startup and can happen on the fly,
-    // but the profile is ultimately needed. So let's load the dictionaries
-    // once the profile has been loaded.
     console.time('Load storage');
     createStorageBackend().then(storage => {
       console.timeEnd('Load storage');
