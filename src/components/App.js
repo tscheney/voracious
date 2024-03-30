@@ -55,10 +55,6 @@ class App extends Component {
             <Route path="/player/:cloc/:vid" render={({ match, history }) => {
               const collectionLocator = decodeURIComponent(match.params.cloc);
               const videoId = decodeURIComponent(match.params.vid);
-              const collection = mainState.collections.get(collectionLocator);
-              if (collection === null || collection === undefined) {
-                return <div></div>;
-              }
               return (
                 <Player 
                   video={mainState.collections.get(collectionLocator).videos.get(videoId)} 
@@ -121,9 +117,6 @@ class App extends Component {
                       const collectionLocator = decodeURIComponent(match.params.cloc);
                       const titleName = decodeURIComponent(match.params.tname);
                       const collection = mainState.collections.get(collectionLocator);
-                      if (collection === null || collection === undefined) {
-                        return <div></div>;
-                      }
                       const title = collection.titles.find(t => t.name === titleName); // unindexed, but should be quick
                       return (
                         <div>
