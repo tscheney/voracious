@@ -16,6 +16,9 @@ const CPRange = new Record({
   cpEnd: null,
 });
 
+const POTENTIAL_END = new Map([['け','く'], ['げ','ぐ'], ['せ','す'], ['ぜ','ず'], ['て','つ'], ['で','づ'],
+                              ['ね','ぬ'], ['へ','ふ'], ['べ','ぶ'], ['ぺ','ぷ'], ['め','む'], ['れ','る']]);
+
 export default class AnnoText extends PureComponent {
   constructor(props) {
     super(props);
@@ -86,7 +89,8 @@ export default class AnnoText extends PureComponent {
     const hitWordAnnos = getKindAtIndex(this.props.annoText, 'word', cpIndex);
     if (hitWordAnnos.length > 0) {
       const a = hitWordAnnos[0];
-      return new CPRange({cpBegin: a.cpBegin, cpEnd: a.cpEnd});
+      const longAnno = this.getLongAnno(this.props.annoText, a.cpBegin, a.cpEnd);
+      return new CPRange({cpBegin: longAnno[0].cpBegin, cpEnd: longAnno[0].cpEnd});
     } else {
       return null;
     }
@@ -154,22 +158,172 @@ export default class AnnoText extends PureComponent {
   handleTooltipMouseLeave = () => {
     this.setHoverTimeout();
   };
+  
+  searchDictionaries = (word) => {
+    return this.props.searchDictionaries(word);
+  }
+  
+  parsePotential = (word) => {
+    if (this.searchDictionaries(word).length == 0) {
+      if (word.length >= 3) {
+        const wordBody = word.slice(0, -2);
+        const wordSecToLast = word.slice(-2, -1);
+        const wordLast = word.slice(-1);
+        if (wordLast == 'る' && POTENTIAL_END.has(wordSecToLast)) {
+          const newEnd = POTENTIAL_END.get(wordSecToLast);
+          const deconjWord = wordBody + newEnd;
+          if (this.searchDictionaries(deconjWord).length > 0) {
+            return deconjWord;
+          }
+        }
+      }
+    }
+    return "";
+  }
+  
+  getLongAnno = (annoText, cpBegin, cpEnd) => {
+    const annos = [];
+    
+    const hitWordAnnos = getKindInRange(annoText, 'word', cpBegin, cpEnd);
+    
+    annoText.annotations.forEach((anno, i) => {
+      if (anno.kind === 'word') {
+        annos.push(anno);
+      }
+    });
+    
+    let searchWordLemma = "";
+    let searchWordsLemma = [];
+    let searchWordConj = "";
+    let searchWordsConj = [];
+    let dicResultLemma;
+    let dicResultConj;
+    let endNumLemma = 0;
+    let endNumConj = -1;
+    let hitBegin = false;
+    let conjType = "";
+    for (let i = 0; i < annos.length; i++) {
+      let lemma = annos[i].data.lemma;
+      if (!hitBegin) {
+        if (hitWordAnnos[0] === annos[i])
+        {
+          hitBegin = true;
+          // since kuromoji does not deconjugate potential forms properly, need to work around it
+          const potential = this.parsePotential(lemma);
+          if (potential != "")
+          {
+            lemma = potential;
+            conjType = "potential";
+          }
+        }
+      }
+      if (hitBegin) {
+        searchWordLemma += lemma;
+        if (annos[i].data.conj != "") {
+          searchWordConj += annos[i].data.conj;
+        }
+        else {
+          searchWordConj += lemma;
+        }
+        
+        searchWordsLemma.push({
+          word: searchWordLemma,
+          endAnno: annos[i],
+        })
+        
+        if (searchWordLemma != searchWordConj) {
+          searchWordsConj.push({
+            word: searchWordConj,
+            endAnno: annos[i],
+          })
+        }
+        else {
+          searchWordsConj.push(null)
+        }
+      }
+    }
+    
+    for (let i = searchWordsLemma.length - 1; i >= 0; i--) {
+      dicResultLemma = this.searchDictionaries(searchWordsLemma[i].word);
+      if (dicResultLemma.length > 0) {
+        endNumLemma = i;
+        if (conjType != "" && searchWordsLemma[i].endAnno.conjType != "") {
+          conjType += " "
+        }
+        conjType += searchWordsLemma[i].endAnno.conjType;
+        break;
+      }
+    }
+    
+    // also check the conjagated forms to accomodate parsing issues and set phrases
+    for (let i = searchWordsConj.length - 1; i >= 0; i--) {
+      if (searchWordsConj[i] != null) {
+        dicResultConj = this.searchDictionaries(searchWordsConj[i].word);
+        if (dicResultConj.length > 0) {
+          endNumConj = i;
+          break;
+        }
+      }
+    }
+    
+    let cpEndResult = searchWordsLemma[endNumLemma].endAnno.cpEnd;
+    let wordResult = searchWordsLemma[endNumLemma].word;
+    let dicResult = dicResultLemma;
+    if (endNumConj >= endNumLemma) {
+      cpEndResult = searchWordsConj[endNumConj].endAnno.cpEnd;
+      wordResult = searchWordsConj[endNumConj].word;
+      dicResult = dicResultConj;
+      conjType = "";
+    }
+    
+    const resultAnno = [];
+    resultAnno.push({
+      cpBegin: cpBegin,
+      cpEnd: cpEndResult,
+      kind: "word",
+      data: {lemma: wordResult},
+      dicResult: dicResult,
+      conjType: conjType,
+    })
+    
+    return resultAnno;
+  }
 
   renderTooltip = () => {
-    const { annoText, searchDictionaries } = this.props;
-
+    const { annoText } = this.props;
     const tooltipRange = this.state.selectionRange || this.state.hoverRange;
 
     if (tooltipRange) {
-      const hitWordAnnos = getKindInRange(annoText, 'word', tooltipRange.cpBegin, tooltipRange.cpEnd);
+      let hitWordAnnos = [];
+      let selEqHov = false;
+      if (this.state.selectionRange && this.state.hoverRange) {
+        selEqHov = this.state.selectionRange.cpBegin == this.state.hoverRange.cpBegin 
+                   && this.state.selectionRange.cpEnd == this.state.hoverRange.cpEnd;
+      }
+      if (this.state.selectionRange && !selEqHov ) {
+        const textSel = annoText.text.slice(tooltipRange.cpBegin, tooltipRange.cpEnd);
+        hitWordAnnos.push({
+          cpBegin: tooltipRange.cpBegin,
+          cpEnd: tooltipRange.cpEnd,
+          data: {lemma: textSel},
+          dicResult: this.searchDictionaries(textSel),
+        })
+      }
+      else {
+        hitWordAnnos = this.getLongAnno(annoText, tooltipRange.cpBegin, tooltipRange.cpEnd);
+      }
       const limitedHitWordAnnos = hitWordAnnos.slice(0, 3);
-
       const anchorElems = [];
-      for (let i = tooltipRange.cpBegin; i < tooltipRange.cpEnd; i++) {
+      for (let i = tooltipRange.cpBegin; i < hitWordAnnos[0].cpEnd; i++) {
         const el = this.charElem[i];
         if (el) {
           anchorElems.push(el);
         }
+      }
+      
+      let conjType = "";
+      if (hitWordAnnos[0].conjType && hitWordAnnos[0].conjType != "") {
+        conjType = " (" + hitWordAnnos[0].conjType + ")"
       }
 
       return (
@@ -177,9 +331,9 @@ export default class AnnoText extends PureComponent {
           <div className="AnnoText-tooltip">
             <ul className="AnnoText-tooltip-search-words-list">
               {limitedHitWordAnnos.map(wordAnno => {
-                const lemma = wordAnno.data.lemma || cpSlice(annoText.text, wordAnno.cpBegin, wordAnno.cpEnd);
+                let lemma = (wordAnno.data.lemma || cpSlice(annoText.text, wordAnno.cpBegin, wordAnno.cpEnd));
                 const encLemma = encodeURIComponent(lemma);
-                const searchHits = searchDictionaries(lemma);
+                const searchHits = hitWordAnnos[0].dicResult;
                 return (
                   <li key={`wordinfo-${wordAnno.cpBegin}:${wordAnno.cpEnd}`} className="AnnoText-tooltip-search-words-item">
                     <div className="AnnoText-tooltip-external-links">
@@ -189,6 +343,9 @@ export default class AnnoText extends PureComponent {
                       <SystemBrowserLink href={'https://jisho.org/search/' + encLemma}>Jisho</SystemBrowserLink>
                     </div>
                     <div className="AnnoText-tooltip-search-word">{lemma}</div>
+                    {(conjType != "")? (
+                      <div className="Annotext-tooltip-dict-hit-text">{conjType}</div>
+                    ) : null}                    
                     <ul className="AnnoText-tooltip-dict-hits">{searchHits.map(({dictionaryName, text}, idx) => (
                       <li key={idx} className="AnnoText-tooltip-dict-hit">
                         <div className="Annotext-tooltip-dict-name">{dictionaryName}</div>

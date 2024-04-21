@@ -12,6 +12,7 @@ const Annotation = new Record({
   cpEnd: null, // integer
   kind: null, // string
   data: null, // this should be immutable
+  conjType: null,
 });
 
 const AnnotatedText = new Record({
@@ -25,14 +26,14 @@ export const create = (text, annotations) => {
 
   if (annotations) {
     for (const a of annotations) {
-      result = addAnnotation(result, a.cpBegin, a.cpEnd, a.kind, a.data);
+      result = addAnnotation(result, a.cpBegin, a.cpEnd, a.kind, a.data, a.conjType);
     }
   }
 
   return result;
 };
 
-export const addAnnotation = (annoText, cpBegin, cpEnd, kind, data) => {
+export const addAnnotation = (annoText, cpBegin, cpEnd, kind, data, conjType) => {
   // TODO: validate annotation
   if (!validKinds.has(kind)) {
     throw new Error('invalid kind ' + kind);
@@ -45,6 +46,7 @@ export const addAnnotation = (annoText, cpBegin, cpEnd, kind, data) => {
       cpEnd,
       kind,
       data,
+      conjType,
     })),
   });
 
@@ -83,9 +85,9 @@ export const removeHighlightAnnotations = (annoText, cpBegin, cpEnd, setId) => {
   return newAnnoText;
 };
 
-export const addWordAnnotation = (annoText, cpBegin, cpEnd, lemma) => {
+export const addWordAnnotation = (annoText, cpBegin, cpEnd, lemma, conjType) => {
   const data = lemma ? {lemma} : {};
-  return addAnnotation(annoText, cpBegin, cpEnd, 'word', data);
+  return addAnnotation(annoText, cpBegin, cpEnd, 'word', data, conjType);
 };
 
 export const clearKindInRange = (annoText, cpBegin, cpEnd, kind) => {

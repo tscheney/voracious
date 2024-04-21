@@ -5,7 +5,10 @@ import { cpSlice } from '../util/string';
 import { builder } from '../../public/kuromoji/kuromoji'; // loaded by script tag in index.html, we do this to avoid lint warning
 
 const dmp = new DiffMatchPatch();
-
+const VERB_CONJ_SUFFIX = ['て', 'で', 'ば', 'ちゃ', 'じゃ'];
+const VERB_CONJ_NOT_IND = ['くださる', 'てる', 'なさる'];
+const SHIMAU_FORMS = ['ちゃう', 'ちまう', 'じゃう', 'じまう'];
+const NOUN_CONJ_SUFFIX = ['そう'];
 let kuromojiTokenizer = null;
 let kuromojiLoadPromise = null;
 
@@ -28,6 +31,118 @@ export const ensureKuromojiLoaded = async () => {
   await kuromojiLoadPromise;
 };
 
+const isConj = (t, lastToken) => {
+  let lastPosDetail1ChaJa = false;
+  if (lastToken) {
+    lastPosDetail1ChaJa = (lastToken.basic_form == 'ちゃ' || lastToken.basic_form == 'じゃ');
+  }
+  return (
+       ((t.conjugated_type.slice(0,2) == '特殊' && !(t.conjugated_type == '特殊・デス' 
+      && (t.surface_form == 'です' || t.surface_form == 'っす')))
+      && !(t.conjugated_type == '特殊・ダ' && t.surface_form == 'で'))
+    || t.conjugated_type == '不変化型'
+    || (t.pos_detail_1 == '接続助詞' && VERB_CONJ_SUFFIX.includes(t.basic_form))
+    || (t.pos == '動詞' && t.pos_detail_1 == '接尾')
+    || (t.pos == '動詞' && t.pos_detail_1 == '非自立' && VERB_CONJ_NOT_IND.includes(t.basic_form)))
+    || (t.pos_detail_1 == '接尾' && t.pos_detail_2 ==  '助動詞語幹' && NOUN_CONJ_SUFFIX.includes(t.basic_form))
+    || SHIMAU_FORMS.includes(t.basic_form)
+    || (t.pos_detail_1 == '並立助詞' && t.basic_form == 'たり')
+    || (lastPosDetail1ChaJa && t.basic_form == 'いる' 
+      && t.pos_detail_1 == '非自立' && t.surface_form == 'い'); // handles a weird case where kuromoji doesn't parse ちゃう form correctly 
+}
+
+const singleWordConj = (t) => {
+  return (
+        t.conjugated_form == '命令ｒｏ' 
+    ||  (t.pos == '動詞' && t.basic_form != t.surface_form && t.surface_form.length >= 3 
+        && t.surface_form.slice(-2) == 'りゃ')
+  )
+}
+
+const conjType = (curConjType, t, lastToken) => {
+  let lastPosDetail1ChaJa = false;
+  if (lastToken) {
+    lastPosDetail1ChaJa = (lastToken.basic_form == 'ちゃ' || lastToken.basic_form == 'じゃ');
+  }
+  let addition = ""
+  if (t.conjugated_form == '命令ｒｏ' || t.surface_form == 'なさい') {
+    addition = "imperative";
+  } else if ((t.conjugated_type == '特殊・ナイ' && t.surface_form !='なきゃ') || t.conjugated_type == '特殊・ヌ'
+    || (t.conjugated_type == '不変化型' && t.basic_form == 'ん')) {
+    addition = "negative";
+  } else if (t.conjugated_type == '特殊・タ' || t.conjugated_type == '特殊・ダ') {
+    if (t.surface_form == 'たら') {
+      addition = "conditional";
+    } else if (t.surface_form == 'なら') {
+      addition = "provisional";
+    } else {
+      addition = "past";
+    }
+  } else if (t.conjugated_type == '特殊・マス' || t.conjugated_type == '特殊・デス') {
+    if (lastToken.surface_form == 'て' && lastToken.pos == '助詞' && lastToken.pos_detail_1 == '接続助詞') {
+      addition = "-いる "
+    }
+    addition += "polite";
+  } else if (t.conjugated_type == '特殊・タイ') {
+    addition = "desire";
+  } else if (t.conjugated_type == '不変化型' && t.basic_form == 'う') {
+    addition = "presumptive";
+  } else if (t.pos_detail_1 == '接続助詞'
+    && (t.basic_form == 'て' || t.basic_form == 'で')) {
+    addition = "て"
+  } else if (t.pos_detail_1 == '接続助詞' && t.basic_form == 'ば') {
+    addition = "provisional";
+  } else if (t.pos_detail_1 == '接尾'
+    && (t.basic_form == 'られる' || t.basic_form == 'れる')) {
+    addition = "passive";
+  } else if (t.pos_detail_1 == '接尾'
+    && (t.basic_form == 'させる' || t.basic_form == 'せる')) {
+    addition = "causitive";
+  } else if (((t.basic_form == 'ちゃう' || t.basic_form == 'じゃう'
+    || t.basic_form == 'ちまう' || t.basic_form == 'じまう')
+    || (lastPosDetail1ChaJa && t.basic_form == 'いる' 
+    && t.pos_detail_1 == '非自立' && t.surface_form == 'い')
+    && lastToken.pos_detail_1 == '接続助詞'))
+  {
+    if (lastPosDetail1ChaJa) {
+      curConjType = curConjType.replace("ては contraction","")
+    }
+    addition = "しまう";
+  } else if (t.pos_detail_1 == '非自立' && t.basic_form == 'くださる') {
+    addition += "polite imperative";
+  } else if (t.pos_detail_1 == '非自立' && t.basic_form == 'てる') {
+    addition += "て-いる";
+  } else if (t.pos_detail_1 == '接尾' && t.basic_form == 'そう') {
+    addition += "appearance";
+  } else if (t.pos == '動詞' && t.basic_form != t.surface_form && t.surface_form.length >= 3 
+    && t.surface_form.slice(-2) == "りゃ") {
+    addition = "provisional contraction";
+  } else if ((t.conjugated_type == '特殊・ナイ' && t.surface_form =='なきゃ')
+    || (t.basic_form == 'ちゃ' || t.basic_form == 'じゃ')) {
+    if (t.conjugated_type == '特殊・ナイ') {
+      addition = "negative "
+    }
+    addition += "ては contraction";
+  } else if (t.pos_detail_1 == '並立助詞' && t.basic_form == 'たり') {
+    addition = "listing";
+  }
+  
+  let newConjType = curConjType;
+  
+  if (curConjType == "" || curConjType == "stem") {
+    newConjType = addition;
+  }
+  else if (curConjType != "" && addition != "" && !curConjType.includes(addition)) {
+    if (addition.charAt(0) != '-') {
+      newConjType += " ";
+    }
+    newConjType += addition;
+  }
+  
+  return newConjType;
+   
+}
+
 const analyzeJAKuromoji = async (text) => {
   await ensureKuromojiLoaded();
 
@@ -37,8 +152,16 @@ const analyzeJAKuromoji = async (text) => {
   // code point indexes, not byte indexes
   let cpBegin;
   let cpEnd = 0;
+  
+  let inVerbConj = false;
+  let lastToken = null;
+  let curToken = null;
 
   for (const t of tokens) {
+    if (curToken) {
+      lastToken = curToken;
+    }
+    curToken = t;
     cpBegin = cpEnd;
     cpEnd = cpBegin + [...t.surface_form].length;
 
@@ -57,18 +180,64 @@ const analyzeJAKuromoji = async (text) => {
     if (t.pos === '記号') {
       continue;
     }
+    
+    let inputData = {};
+    if (t.basic_form === '*') {
+        inputData = {
+            lemma: t.surface_form,
+            conj: "",
+        } // covers certain cases that don't work otherwise
+    }
+    else {
+        inputData = {
+            lemma: t.basic_form,
+            conj: t.surface_form,
+        } // conjugated verb
+    }
+    
+    // Connect verb conjugation suffixes
+     if (inVerbConj && isConj(t, lastToken)) {
+      let indexOfLastWord = -1;
+      annotations.forEach((anno, i) => {
+        if (anno.kind === 'word') {
+          indexOfLastWord = i;
+        }
+      });
+      if (indexOfLastWord != -1) {
+        const anno = annotations[indexOfLastWord];
+        anno.cpEnd = cpEnd;
+        anno.data.conj += t.surface_form;
+        anno.conjType = conjType(anno.conjType, t, lastToken);
+        continue;
+      }
+    }
+    else {
+      // special ろ cases
+      let newConjType = "";
+      if (singleWordConj(t)) { 
+        newConjType = conjType("", t, lastToken);
+        inVerbConj = false;
+      } else if (t.pos == '動詞' || t.pos == '形容詞' && t.basic_form != t.surface_form) {
+        if (t.conjugated_form == '連用形') {
+          newConjType = "stem";
+        }
+        inVerbConj = true;
+      } else {
+        inVerbConj = false;
+      }
+      annotations.push({
+          cpBegin,
+          cpEnd,
+          kind: 'word',
+          data: inputData,
+          conjType: newConjType,
+        });
+    }
 
     // skip ones without basic_form properly set, for now
     if (t.basic_form === '*') {
       continue;
     }
-
-    annotations.push({
-      cpBegin,
-      cpEnd,
-      kind: 'word',
-      data: (t.basic_form === textSlice) ? {} : {lemma: t.basic_form},
-    });
 
     if (t.reading !== '*') {
       const kataReading = hiraToKata(t.reading);
@@ -96,6 +265,7 @@ const analyzeJAKuromoji = async (text) => {
                 cpEnd: cpBegin + endOff,
                 kind: 'ruby',
                 data: s,
+                conjType: '',
               });
               beginOff = endOff;
             } else {
@@ -116,6 +286,7 @@ const analyzeJAKuromoji = async (text) => {
             cpEnd,
             kind: 'ruby',
             data: hiraReading,
+            conjType: '',
           });
         }
       }
