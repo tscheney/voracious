@@ -32,12 +32,8 @@ export const ensureKuromojiLoaded = async () => {
   await kuromojiLoadPromise;
 };
 
-const isConj = (t, lastToken, nextToken) => {
+const isConj = (t, lastToken) => {
   let lastPosDetail1ChaJa = false
-  let nextTokenSurface = "";
-  if (nextToken) {
-    nextTokenSurface = nextToken.surface_form;
-  }
   if (lastToken) {
     lastPosDetail1ChaJa = (lastToken.basic_form == 'ちゃ' || lastToken.basic_form == 'じゃ');
   }
@@ -177,10 +173,6 @@ const analyzeJAKuromoji = async (text) => {
       lastToken = curToken;
     }
     curToken = t;
-    let nextToken = null;
-    if (i < tokens.length - 2) {
-      nextToken = tokens[i + 1];
-    }
     cpBegin = cpEnd;
     cpEnd = cpBegin + [...t.surface_form].length;
 
@@ -215,7 +207,7 @@ const analyzeJAKuromoji = async (text) => {
     }
     
     // Connect verb conjugation suffixes
-     if (inVerbConj && isConj(t, lastToken, nextToken)) {
+     if (inVerbConj && isConj(t, lastToken)) {
       let indexOfLastWord = -1;
       annotations.forEach((anno, i) => {
         if (anno.kind === 'word') {
