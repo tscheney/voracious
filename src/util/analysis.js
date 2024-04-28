@@ -9,6 +9,7 @@ const VERB_CONJ_SUFFIX = ['て', 'で', 'ば', 'ちゃ', 'じゃ'];
 const VERB_CONJ_NOT_IND = ['くださる', 'てる', 'なさる'];
 const SHIMAU_FORMS = ['ちゃう', 'ちまう', 'じゃう', 'じまう'];
 const NOUN_CONJ_SUFFIX = ['そう'];
+const DA_PAST_ENDING = ['ぐ', 'む', 'ぶ', 'ぬ']
 let kuromojiTokenizer = null;
 let kuromojiLoadPromise = null;
 
@@ -31,15 +32,28 @@ export const ensureKuromojiLoaded = async () => {
   await kuromojiLoadPromise;
 };
 
-const isConj = (t, lastToken) => {
-  let lastPosDetail1ChaJa = false;
+const isConj = (t, lastToken, nextToken) => {
+  let lastPosDetail1ChaJa = false
+  let nextTokenSurface = "";
+  if (nextToken) {
+    nextTokenSurface = nextToken.surface_form;
+  }
   if (lastToken) {
     lastPosDetail1ChaJa = (lastToken.basic_form == 'ちゃ' || lastToken.basic_form == 'じゃ');
   }
+  
+  const isSpecial = t.conjugated_type.slice(0,2) == '特殊';
+  const isSurfDesu = t.conjugated_type == '特殊・デス' 
+    && (t.surface_form == 'です' || t.surface_form == 'っす');
+  const isNonConjSpecDa = t.conjugated_type == '特殊・ダ'
+    && (t.surface_form == 'で'
+    || (!DA_PAST_ENDING.includes(lastToken.basic_form.slice(-1))
+      && t.surface_form != "だろ"))
+  const isNonConjSpecTa = t.conjugated_type == '特殊・タ' && t.surface_form == 'た'
+    && DA_PAST_ENDING.includes(lastToken.basic_form.slice(-1))
+  
   return (
-       ((t.conjugated_type.slice(0,2) == '特殊' && !(t.conjugated_type == '特殊・デス' 
-      && (t.surface_form == 'です' || t.surface_form == 'っす')))
-      && !(t.conjugated_type == '特殊・ダ' && t.surface_form == 'で'))
+       (isSpecial && !isSurfDesu && !isNonConjSpecDa && !isNonConjSpecTa)
     || t.conjugated_type == '不変化型'
     || (t.pos_detail_1 == '接続助詞' && VERB_CONJ_SUFFIX.includes(t.basic_form))
     || (t.pos == '動詞' && t.pos_detail_1 == '接尾')
@@ -157,11 +171,16 @@ const analyzeJAKuromoji = async (text) => {
   let lastToken = null;
   let curToken = null;
 
-  for (const t of tokens) {
+  for (let i = 0; i < tokens.length; i++) {
+    const t = tokens[i];
     if (curToken) {
       lastToken = curToken;
     }
     curToken = t;
+    let nextToken = null;
+    if (i < tokens.length - 2) {
+      nextToken = tokens[i + 1];
+    }
     cpBegin = cpEnd;
     cpEnd = cpBegin + [...t.surface_form].length;
 
@@ -196,7 +215,7 @@ const analyzeJAKuromoji = async (text) => {
     }
     
     // Connect verb conjugation suffixes
-     if (inVerbConj && isConj(t, lastToken)) {
+     if (inVerbConj && isConj(t, lastToken, nextToken)) {
       let indexOfLastWord = -1;
       annotations.forEach((anno, i) => {
         if (anno.kind === 'word') {
