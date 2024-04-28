@@ -32,10 +32,20 @@ function resolveHtmlPath(htmlFileName) {
 
 async function createWindow() {    
   // Create the browser window.
+  let iconPath = "";
+  if (process.platform === 'win32') {
+    iconPath = '../../buildResources/icon.ico';
+  }
+  else if (process.platform === 'darwin') {
+    iconPath = '../../buildResources/icon.icns'; 
+  }
+  else { // linux
+    iconPath = '../../buildResources/icon.png';
+  }
   mainWindow = new BrowserWindow({
     width: 1280,
     height: 720,
-    icon: path.join(__dirname, '../../buildResources/icon.ico'),
+    icon: path.join(__dirname, iconPath),
     webPreferences: {
       sandbox: false,      
       preload: path.join(__dirname, 'preload.js'),
