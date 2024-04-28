@@ -39,8 +39,8 @@ const isConj = (t, lastToken) => {
   }
   
   const isSpecial = t.conjugated_type.slice(0,2) == '特殊';
-  const isSurfDesu = t.conjugated_type == '特殊・デス' 
-    && (t.surface_form == 'です' || t.surface_form == 'っす');
+  const isNonConjDesu = t.conjugated_type == '特殊・デス' 
+    && (t.surface_form == 'です' || t.surface_form == 'っす' || t.surface_form == 'っしょ');
   const isNonConjSpecDa = t.conjugated_type == '特殊・ダ'
     && (t.surface_form == 'で'
     || (!DA_PAST_ENDING.includes(lastToken.basic_form.slice(-1))
@@ -49,7 +49,7 @@ const isConj = (t, lastToken) => {
     && DA_PAST_ENDING.includes(lastToken.basic_form.slice(-1))
   
   return (
-       (isSpecial && !isSurfDesu && !isNonConjSpecDa && !isNonConjSpecTa)
+       (isSpecial && !isNonConjDesu && !isNonConjSpecDa && !isNonConjSpecTa)
     || t.conjugated_type == '不変化型'
     || (t.pos_detail_1 == '接続助詞' && VERB_CONJ_SUFFIX.includes(t.basic_form))
     || (t.pos == '動詞' && t.pos_detail_1 == '接尾')
@@ -65,7 +65,7 @@ const singleWordConj = (t) => {
   return (
         t.conjugated_form == '命令ｒｏ' 
     ||  (t.pos == '動詞' && t.basic_form != t.surface_form && t.surface_form.length >= 3 
-        && t.surface_form.slice(-2) == 'りゃ')
+        && (t.surface_form.slice(-2) == 'りゃ' || t.surface_form.slice(-2) == 'きゃ'))
   )
 }
 
@@ -128,7 +128,9 @@ const conjType = (curConjType, t, lastToken) => {
     && t.surface_form.slice(-2) == "りゃ") {
     addition = "provisional contraction";
   } else if ((t.conjugated_type == '特殊・ナイ' && t.surface_form =='なきゃ')
-    || (t.basic_form == 'ちゃ' || t.basic_form == 'じゃ')) {
+    || (t.basic_form == 'ちゃ' || t.basic_form == 'じゃ')
+    || (t.pos == '動詞' && t.basic_form != t.surface_form && t.surface_form.length >= 3 
+    && t.surface_form.slice(-2) == "きゃ")) {
     if (t.conjugated_type == '特殊・ナイ') {
       addition = "negative "
     }
