@@ -202,6 +202,7 @@ export default class AnnoText extends PureComponent {
     let endNumConj = -1;
     let hitBegin = false;
     let conjType = "";
+    let skipRemainingLemma = false;
     for (let i = 0; i < annos.length; i++) {
       let lemma = annos[i].data.lemma;
       if (!hitBegin) {
@@ -225,13 +226,14 @@ export default class AnnoText extends PureComponent {
         else {
           searchWordConj += lemma;
         }
+        if (!skipRemainingLemma) {
+          searchWordsLemma.push({
+            word: searchWordLemma,
+            endAnno: annos[i],
+          })
+        }
         
-        searchWordsLemma.push({
-          word: searchWordLemma,
-          endAnno: annos[i],
-        })
-        
-        if (searchWordLemma != searchWordConj) {
+        if ((searchWordLemma != searchWordConj) || skipRemainingLemma) {
           searchWordsConj.push({
             word: searchWordConj,
             endAnno: annos[i],
@@ -239,6 +241,9 @@ export default class AnnoText extends PureComponent {
         }
         else {
           searchWordsConj.push(null)
+        }
+        if (annos[i].data.conj != annos[i].data.lemma) {
+          skipRemainingLemma = true;
         }
       }
     }
@@ -255,7 +260,7 @@ export default class AnnoText extends PureComponent {
       }
     }
     
-    // also check the conjagated forms to accomodate parsing issues and set phrases
+    // also check the conjagated forms (i.e. as written) to accomodate parsing issues and set phrases
     for (let i = searchWordsConj.length - 1; i >= 0; i--) {
       if (searchWordsConj[i] != null) {
         dicResultConj = this.searchDictionaries(searchWordsConj[i].word);
