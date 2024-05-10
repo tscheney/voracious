@@ -6,7 +6,7 @@ import { builder } from '../../public/kuromoji/kuromoji'; // loaded by script ta
 
 const dmp = new DiffMatchPatch();
 const VERB_CONJ_SUFFIX = ['て', 'で', 'ば', 'ちゃ', 'じゃ'];
-const VERB_CONJ_NOT_IND = ['くださる', 'てる', 'なさる'];
+const VERB_CONJ_NOT_IND = ['くださる', 'てる', 'でる', 'なさる'];
 const SHIMAU_FORMS = ['ちゃう', 'ちまう', 'じゃう', 'じまう'];
 const NOUN_CONJ_SUFFIX = ['そう'];
 const DA_PAST_ENDING = ['ぐ', 'む', 'ぶ', 'ぬ']
@@ -69,7 +69,7 @@ const singleWordConj = (t) => {
   )
 }
 
-const conjType = (curConjType, t, lastToken) => {
+const conjType = (curConjType, t, lastToken, nextToken) => {
   let lastPosDetail1ChaJa = false;
   if (lastToken) {
     lastPosDetail1ChaJa = (lastToken.basic_form == 'ちゃ' || lastToken.basic_form == 'じゃ');
@@ -93,6 +93,9 @@ const conjType = (curConjType, t, lastToken) => {
       addition = "-いる "
     }
     addition += "polite";
+    if ((!nextToken || !nextToken.basic_form == 'う') && (t.surface_form == 'でしょ' || t.surface_form == 'ましょ')) {
+      addition += " presumptive"
+    }
   } else if (t.conjugated_type == '特殊・タイ') {
     addition = "desire";
   } else if (t.conjugated_type == '不変化型' && t.basic_form == 'う') {
@@ -120,7 +123,7 @@ const conjType = (curConjType, t, lastToken) => {
     addition = "しまう";
   } else if (t.pos_detail_1 == '非自立' && t.basic_form == 'くださる') {
     addition += "polite imperative";
-  } else if (t.pos_detail_1 == '非自立' && t.basic_form == 'てる') {
+  } else if (t.pos_detail_1 == '非自立' && (t.basic_form == 'てる' || t.basic_form == 'でる')) {
     addition += "て-いる";
   } else if (t.pos_detail_1 == '接尾' && t.basic_form == 'そう') {
     addition += "appearance";
@@ -177,6 +180,11 @@ const analyzeJAKuromoji = async (text) => {
     curToken = t;
     cpBegin = cpEnd;
     cpEnd = cpBegin + [...t.surface_form].length;
+    
+    let nextToken = null;
+    if (i < tokens.length - 1) {
+      nextToken = tokens[i+1];
+    }
 
     const textSlice = cpSlice(text, cpBegin, cpEnd);
 
@@ -220,7 +228,7 @@ const analyzeJAKuromoji = async (text) => {
         const anno = annotations[indexOfLastWord];
         anno.cpEnd = cpEnd;
         anno.data.conj += t.surface_form;
-        anno.conjType = conjType(anno.conjType, t, lastToken);
+        anno.conjType = conjType(anno.conjType, t, lastToken, nextToken);
         continue;
       }
     }
@@ -228,7 +236,7 @@ const analyzeJAKuromoji = async (text) => {
       // special ろ cases
       let newConjType = "";
       if (singleWordConj(t)) { 
-        newConjType = conjType("", t, lastToken);
+        newConjType = conjType("", t, lastToken, nextToken);
         inVerbConj = false;
       } else if (t.pos == '動詞' || t.pos == '形容詞' && t.basic_form != t.surface_form) {
         if (t.conjugated_form == '連用形') {
