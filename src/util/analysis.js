@@ -93,7 +93,10 @@ const conjType = (curConjType, t, lastToken, nextToken) => {
       addition = "-いる "
     }
     addition += "polite";
-    if ((!nextToken || !nextToken.basic_form == 'う') && (t.surface_form == 'でしょ' || t.surface_form == 'ましょ')) {
+    //test2  = nextToken.basic_form != 'う'
+    //test3 = t.surface_form == 'でしょ'
+    //test4 = t.surface_form == 'ましょ'
+    if ((nextToken == null || nextToken.basic_form != 'う') && (t.surface_form == 'でしょ' || t.surface_form == 'ましょ')) {
       addition += " presumptive"
     }
   } else if (t.conjugated_type == '特殊・タイ') {
