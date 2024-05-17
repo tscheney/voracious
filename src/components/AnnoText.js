@@ -16,7 +16,7 @@ const CPRange = new Record({
   cpEnd: null,
 });
 
-const POTENTIAL_END = new Map([['け','く'], ['げ','ぐ'], ['せ','す'], ['ぜ','ず'], ['て','つ'], ['で','づ'],
+const POTENTIAL_END = new Map([['え','う'],['け','く'], ['げ','ぐ'], ['せ','す'], ['ぜ','ず'], ['て','つ'], ['で','づ'],
                               ['ね','ぬ'], ['へ','ふ'], ['べ','ぶ'], ['ぺ','ぷ'], ['め','む'], ['れ','る']]);
 
 export default class AnnoText extends PureComponent {
