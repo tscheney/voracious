@@ -39,26 +39,20 @@ Electron-builder is configured via `electron-builder.json`. The current config h
 
 ## Installing for development
 
-To install for development you'll first need NodeJS, Yarn, and some extra build tools for node-gyp ([see here](https://github.com/nodejs/node-gyp)). Then:
+To install for development you'll first need NodeJS (I'm currently building with NodeJS 20.11.1 and npm 10.4.0), Yarn (version 1.22.21), and some extra build tools for node-gyp ([see here](https://github.com/nodejs/node-gyp)). Then:
 
 ```
 $ yarn # install pure-JS and development dependencies
-$ cd app
-$ yarn # install dependencies that include native code in app/ subdir
-$ cd ..
-$ yarn rebuild-native # rebuild native deps in app/node_modules against correct Electron V8 runtime
+$ yarn build # rebuild native deps in app/node_modules against correct Electron runtime
 ```
 
 ## Running in development mode
 
-Start the React development server with:
-```
-$ yarn react-start
-```
+There is a Visual Studio Code project in the repo that has debug working that I recommend. Running "Electron: All" will launch both main and renderer.
 
-Once the React server has started up, **in a separate terminal** run:
+To start from the command line, after building run
 ```
-$ yarn electron-start
+$ yarn start
 ```
 
 The Electron app will open, with the main window serving from the development server (localhost:3000). Edits to the source will cause it to automatically reload.
@@ -67,23 +61,23 @@ The Electron app will open, with the main window serving from the development se
 
 First build the JS:
 ```
-$ yarn react-build
+$ yarn build
 ```
 
 Then build the distributable desktop app:
 ```
-$ yarn dist
+$ yarn package
 ```
 
-The output archive/executable can then be found in the `dist` dir.
+The output archive/executable can then be found in the "release/build" folder.
 
 If you just want to run the built app and don't need it packed into an archive/executable for distribution, then run:
 
 ```
-$ yarn dist-nopack
+$ yarn rebuild
 ```
 
-## Building a Linux release in a VM
+## Building a Linux release in a VM (untested)
 
 Download and install [VirtualBox](https://www.virtualbox.org/) and [Vagrant](https://www.vagrantup.com/). Then run:
 ```
