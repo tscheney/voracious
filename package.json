@@ -78,22 +78,14 @@
       "dist",
       "node_modules",
       "package.json",
-      "resources"
+      "resources/dictionaries"
     ],
     "afterSign": ".erb/scripts/notarize.js",
     "mac": {
-      "target": {
-        "target": "default",
-        "arch": [
-          "arm64",
-          "x64"
-        ]
-      },
-      "type": "distribution",
-      "hardenedRuntime": true,
-      "entitlements": "assets/entitlements.mac.plist",
-      "entitlementsInherit": "assets/entitlements.mac.plist",
-      "gatekeeperAssess": false
+      "files": [
+        "resources/bin/darwin/**"
+      ],
+      "target": "zip"
     },
     "dmg": {
       "contents": [
@@ -110,15 +102,16 @@
       ]
     },
     "win": {
-      "target": [
-        "nsis"
-      ]
+      "files": [
+        "resources/bin/win32/**"
+      ],
+      "target": ["portable", "nsis"]
     },
     "linux": {
-      "target": [
-        "AppImage"
+      "files": [
+        "resources/bin/linux/**"
       ],
-      "category": "Development"
+      "target": ["AppImage"]
     },
     "directories": {
       "app": "release/app",
