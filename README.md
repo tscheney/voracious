@@ -17,6 +17,16 @@ Voracious lets you:
 - **Export subtitles as sentence cards** to Anki (with audio and/or image, ala [subs2srs](http://subs2srs.sourceforge.net/)), instantly via [AnkiConnect](https://ankiweb.net/shared/info/2055492159)
 - _(coming soon)_ **Search for words/phrases** over your entire library of subtitles
 
+# New in version 8.3.0
+- Updated to Electron 29.0.1 and releated security improvments
+- Hardware HEVC support
+- Vastly improved word annotations including verb conjugation
+- Chapter support
+- UI improvments, including improvments by Cessen
+- Refresh collection button to reload vidoes/subs without restarting the app
+- Updated to latest JMDict
+- Many bug, error, and warning fixes
+
 # Using Voracious (Quick Start)
 
 Before using Voracious, you need to have a media collection that's organized and named the same way you would for Kodi or Plex _(each show/movie in its own directory, subtitle filename matching video filenames, etc.)_. Note that Voracious cannot currently play some popular video/audio codecs, including and AC3. Also, keep in mind that Voracious won't be useful unless you have subtitles in the language you're trying to learn.
