@@ -18,12 +18,12 @@ Voracious lets you:
 - _(coming soon)_ **Search for words/phrases** over your entire library of subtitles
 
 # New in version 8.3.0
-- Updated to Electron 29.0.1 and releated security improvments
+- Updated to Electron 29.0.1 and related security improvements
 - Hardware HEVC support
 - Vastly improved word annotations including verb conjugation
 - Chapter support
-- UI improvments, including improvments by Cessen
-- Refresh collection button to reload vidoes/subs without restarting the app
+- UI improvements, including improvements by Cessen
+- Refresh collection button to reload videos/subs without restarting the app
 - Updated to latest JMDict
 - Many bug, error, and warning fixes
 
